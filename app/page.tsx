@@ -157,6 +157,7 @@ function AuthenticatedContent() {
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
   const [editSelectedImage, setEditSelectedImage] = useState<File | null>(null);
   const [editImageError, setEditImageError] = useState<string | null>(null);
+  const [editImageRemoved, setEditImageRemoved] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [formErrors, setFormErrors] = useState<{
     title?: string;
@@ -383,6 +384,7 @@ function AuthenticatedContent() {
     setEditSelectedImage(null);
     setEditImagePreview(null);
     setEditImageError(null);
+    setEditImageRemoved(false);
   };
 
   const handleEditCancel = () => {
@@ -392,6 +394,7 @@ function AuthenticatedContent() {
     setEditSelectedImage(null);
     setEditImagePreview(null);
     setEditImageError(null);
+    setEditImageRemoved(false);
   };
 
   const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -435,6 +438,7 @@ function AuthenticatedContent() {
           setEditSelectedImage(file);
           setEditImagePreview(reader.result as string);
           setEditImageError(null);
+          setEditImageRemoved(false);
         };
         img.onerror = () => {
           setEditImageError("Invalid image file. Please choose a valid image.");
@@ -475,10 +479,11 @@ function AuthenticatedContent() {
         });
         const response = await result.json();
         imageId = response.storageId as Id<"_storage">;
-      } else if (currentRec?.imageId) {
-        // Keep existing image if no new image selected
+      } else if (!editImageRemoved && currentRec?.imageId) {
+        // Keep existing image if no new image selected and image wasn't removed
         imageId = currentRec.imageId;
       }
+      // If editImageRemoved is true, imageId remains undefined
 
       // Update recommendation
       await updateRec({
@@ -824,7 +829,7 @@ function AuthenticatedContent() {
                     <p className="text-sm text-red-700 dark:text-red-400 font-medium">{editImageError}</p>
                   </div>
                 )}
-                {(editImagePreview || (editImageUrl && !editSelectedImage)) && !editImageError && (
+                {(editImagePreview || (editImageUrl && !editSelectedImage && !editImageRemoved)) && !editImageError && (
                   <div className="relative group">
                     <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
                       <img
@@ -839,6 +844,7 @@ function AuthenticatedContent() {
                         setEditSelectedImage(null);
                         setEditImagePreview(null);
                         setEditImageError(null);
+                        setEditImageRemoved(true);
                         const fileInput = document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement;
                         if (fileInput) fileInput.value = "";
                       }}
