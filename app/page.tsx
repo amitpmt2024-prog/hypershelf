@@ -16,18 +16,21 @@ const MOVIE_TYPES = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Romanc
 export default function Home() {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border-b border-blue-200/60 dark:border-blue-800/40">
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
-                <span className="text-white font-bold text-xl">H</span>
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 dark:from-blue-500 dark:via-cyan-500 dark:to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 ring-2 ring-blue-500/20">
+                  <span className="text-white font-bold text-lg">H</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl opacity-0 hover:opacity-20 transition-opacity"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-blue-700 dark:text-blue-400 tracking-tight">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
                   HypeShelf
                 </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5 hidden sm:block">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 -mt-0.5 hidden sm:block">
                   Collect and share the stuff you&apos;re hyped about
                 </p>
               </div>
@@ -35,20 +38,20 @@ export default function Home() {
             <div suppressHydrationWarning className="flex items-center gap-3">
               <Unauthenticated>
                 <SignInButton mode="modal">
-                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border-2 border-blue-300 dark:border-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
                     <span>Sign in</span>
-                    <span className="text-blue-600 dark:text-blue-400">→</span>
+                    <span>→</span>
                   </button>
                 </SignInButton>
               </Unauthenticated>
               <Authenticated>
-        <UserButton />
+                <UserButton />
               </Authenticated>
             </div>
           </div>
         </div>
       </header>
-      <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10 sm:py-14">
         <Authenticated>
             <AuthenticatedContent />
@@ -94,7 +97,7 @@ function PublicContent() {
 
       {recommendations.length === 0 ? (
         <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 mb-5 shadow-lg shadow-blue-500/10">
             <span className="text-4xl">📚</span>
           </div>
           <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
@@ -104,7 +107,7 @@ function PublicContent() {
             Be the first to share something you&apos;re hyped about!
           </p>
           <SignInButton mode="modal">
-            <button className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all">
+            <button className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105 active:scale-95">
               <span>Get Started</span>
               <span>→</span>
             </button>
@@ -656,7 +659,7 @@ function AuthenticatedContent() {
             <button
               type="button"
               onClick={handleEditCancel}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-transparent hover:border-slate-300 dark:hover:border-slate-600"
             >
               <svg
                 className="w-5 h-5"
@@ -678,7 +681,7 @@ function AuthenticatedContent() {
 
           <form
             onSubmit={handleEditSubmit}
-            className="bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+            className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50"
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
@@ -841,14 +844,14 @@ function AuthenticatedContent() {
                   type="button"
                   onClick={handleEditCancel}
                   disabled={updating}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updating}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {updating ? "Updating..." : "Update"}
                 </button>
@@ -858,16 +861,8 @@ function AuthenticatedContent() {
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
-              <div>
-                <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
-                  Your HypeShelf
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-                  Manage your recommendations and discover new favorites
-                </p>
-              </div>
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => {
@@ -880,7 +875,7 @@ function AuthenticatedContent() {
                     setImageError(null);
                   }
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105 active:scale-95"
               >
                 <span className="text-base">{showAddForm ? "✕" : "+"}</span>
                 <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
@@ -890,7 +885,7 @@ function AuthenticatedContent() {
             {showAddForm && (
               <form
                 onSubmit={handleSubmit}
-                className="bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+                className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50"
               >
                 <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1047,7 +1042,7 @@ function AuthenticatedContent() {
                     <button
                       type="submit"
                       disabled={uploading}
-                      className="w-full px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
                       {uploading ? "Uploading..." : "Submit Recommendation"}
                     </button>
@@ -1064,10 +1059,10 @@ function AuthenticatedContent() {
                       key={genre}
                       type="button"
                       onClick={() => setSelectedGenre(genre)}
-                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                      className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 ${
                         selectedGenre === genre
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 dark:bg-blue-500"
-                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:from-blue-500 dark:to-cyan-500 ring-2 ring-blue-400/20 transform scale-105"
+                          : "bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/10 shadow-sm hover:shadow-md"
                       }`}
                     >
                       {genre === "all" ? "All" : genre}
@@ -1077,7 +1072,7 @@ function AuthenticatedContent() {
 
                 {recommendations.length === 0 ? (
                   <div className="text-center py-20">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 mb-5 shadow-lg shadow-blue-500/10">
                       <span className="text-4xl">📚</span>
                     </div>
                     <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
@@ -1090,7 +1085,7 @@ function AuthenticatedContent() {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {recommendations.map((rec: typeof recommendations[0]) => (
                       <AuthenticatedRecommendationCard
                         key={rec._id}
@@ -1146,10 +1141,10 @@ function RecommendationCard({
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
+    <div className="group relative bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600/50 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-1">
       {recommendation.isStaffPick && (
-        <div className="absolute top-2 right-2 z-10">
-          <span className="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
+        <div className="absolute top-3 right-3 z-10">
+          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/20">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
@@ -1157,17 +1152,17 @@ function RecommendationCard({
       )}
       
       <div className="space-y-3">
-        <div className="w-full aspect-[16/9] rounded-md overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center p-1">
+        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-1 group-hover:border-blue-300 dark:group-hover:border-blue-600/50 transition-colors">
           <img
             src={imageUrl || "/no-image.png"}
             alt={recommendation.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain"
+            className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold border ${genreColor}`}>
+            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${genreColor} shadow-sm`}>
               {recommendation.genre}
             </span>
           </div>
@@ -1176,7 +1171,7 @@ function RecommendationCard({
               href={recommendation.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline"
+              className="hover:underline decoration-2 underline-offset-2"
             >
               {recommendation.title}
             </a>
@@ -1187,8 +1182,8 @@ function RecommendationCard({
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-          <div className="w-6 h-6 rounded-md bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-[10px] shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-500/30 flex-shrink-0 ring-1 ring-blue-500/20">
             {recommendation.authorName.charAt(0).toUpperCase()}
           </div>
           <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
@@ -1257,10 +1252,10 @@ function AuthenticatedRecommendationCard({
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
+    <div className="group relative bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600/50 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-1">
       {recommendation.isStaffPick && (
-        <div className="absolute top-2 right-2 z-10">
-          <span className="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
+        <div className="absolute top-3 right-3 z-10">
+          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/20">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
@@ -1268,17 +1263,17 @@ function AuthenticatedRecommendationCard({
       )}
       
       <div className="space-y-3">
-        <div className="w-full aspect-[16/9] rounded-md overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center p-1">
+        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-1 group-hover:border-blue-300 dark:group-hover:border-blue-600/50 transition-colors">
           <img
             src={imageUrl || "/no-image.png"}
             alt={recommendation.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain"
+            className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
           />
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold border ${genreColor}`}>
+            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${genreColor} shadow-sm`}>
               {recommendation.genre}
             </span>
           </div>
@@ -1287,7 +1282,7 @@ function AuthenticatedRecommendationCard({
               href={recommendation.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline"
+              className="hover:underline decoration-2 underline-offset-2"
             >
               {recommendation.title}
             </a>
@@ -1298,9 +1293,9 @@ function AuthenticatedRecommendationCard({
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-6 h-6 rounded-md bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-[10px] shadow-sm flex-shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-500/30 flex-shrink-0 ring-1 ring-blue-500/20">
               {recommendation.authorName.charAt(0).toUpperCase()}
             </div>
             <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
@@ -1317,10 +1312,10 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title);
                 }}
-                className={`p-1.5 rounded-md transition-all border ${
+                className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md ${
                   recommendation.isStaffPick
-                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
-                    : "bg-slate-100 dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border-transparent hover:border-amber-300 dark:hover:border-amber-700"
+                    ? "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/40 dark:to-amber-800/20 text-amber-600 dark:text-amber-400 border border-amber-300/50 dark:border-amber-700/50 ring-1 ring-amber-400/20"
+                    : "bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-amber-50 hover:to-amber-100/50 dark:hover:from-amber-900/30 dark:hover:to-amber-800/10 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border border-transparent hover:border-amber-300/50 dark:hover:border-amber-700/50"
                 }`}
                 title={recommendation.isStaffPick ? "Remove Staff Pick" : "Mark as Staff Pick"}
               >
@@ -1348,7 +1343,7 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onEdit(recommendation);
                 }}
-                className="group p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all border border-transparent hover:border-blue-300 dark:hover:border-blue-700"
+                className="group p-2 rounded-lg bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/20 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 border border-transparent hover:border-blue-300/50 dark:hover:border-blue-700/50 shadow-sm hover:shadow-md"
                 title="Edit recommendation"
               >
                 <svg
@@ -1375,7 +1370,7 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onDelete(recommendation._id);
                 }}
-                className="group p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all border border-transparent hover:border-red-300 dark:hover:border-red-700"
+                className="group p-2 rounded-lg bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/30 dark:hover:to-pink-900/20 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border border-transparent hover:border-red-300/50 dark:hover:border-red-700/50 shadow-sm hover:shadow-md"
                 title="Delete recommendation"
               >
                 <svg
