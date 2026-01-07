@@ -78,15 +78,20 @@ export const listPublicRecommendations = query({
 });
 
 // Get all recommendations with optional genre filter (authenticated)
+// Returns recommendations with authorId so users can see if they own each recommendation
 export const listAllRecommendations = query({
   args: {
     genre: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // Require authentication
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       throw new Error("Not authenticated");
     }
+
+    // Get user info to include in response for UI permission checks
+    const userInfo = await getUserRole(ctx);
 
     let recommendations;
     if (args.genre && args.genre !== "all") {
@@ -102,17 +107,21 @@ export const listAllRecommendations = query({
         .collect();
     }
 
-    return recommendations.map((rec) => ({
-      _id: rec._id,
-      title: rec.title,
-      genre: rec.genre,
-      link: rec.link,
-      blurb: rec.blurb,
-      authorId: rec.authorId,
-      authorName: rec.authorName,
-      isStaffPick: rec.isStaffPick,
-      _creationTime: rec._creationTime,
-    }));
+    return {
+      recommendations: recommendations.map((rec) => ({
+        _id: rec._id,
+        title: rec.title,
+        genre: rec.genre,
+        link: rec.link,
+        blurb: rec.blurb,
+        authorId: rec.authorId,
+        authorName: rec.authorName,
+        isStaffPick: rec.isStaffPick,
+        _creationTime: rec._creationTime,
+      })),
+      currentUserId: identity.subject, // Used in return statement
+      userRole: userInfo?.role ?? "user",
+    };
   },
 });
 
