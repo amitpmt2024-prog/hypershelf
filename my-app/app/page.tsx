@@ -158,6 +158,18 @@ function AuthenticatedContent() {
   const [editSelectedImage, setEditSelectedImage] = useState<File | null>(null);
   const [editImageError, setEditImageError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [formErrors, setFormErrors] = useState<{
+    title?: string;
+    genre?: string;
+    link?: string;
+    blurb?: string;
+  }>({});
+  const [editFormErrors, setEditFormErrors] = useState<{
+    title?: string;
+    genre?: string;
+    link?: string;
+    blurb?: string;
+  }>({});
 
   const data = useQuery(api.myFunctions.listAllRecommendations, {
     genre: selectedGenre === "all" ? undefined : selectedGenre,
@@ -232,9 +244,56 @@ function AuthenticatedContent() {
     }
   };
 
+  const validateForm = (data: { title: string; genre: string; link: string; blurb: string }) => {
+    const errors: { title?: string; genre?: string; link?: string; blurb?: string } = {};
+
+    // Title validation
+    if (!data.title.trim()) {
+      errors.title = "Title is required";
+    } else if (data.title.trim().length < 3) {
+      errors.title = "Title must be at least 3 characters";
+    } else if (data.title.trim().length > 200) {
+      errors.title = "Title must be less than 200 characters";
+    }
+
+    // Genre validation
+    if (!data.genre) {
+      errors.genre = "Please select a genre";
+    }
+
+    // Link validation
+    if (!data.link.trim()) {
+      errors.link = "Link is required";
+    } else {
+      try {
+        const url = new URL(data.link);
+        if (!["http:", "https:"].includes(url.protocol)) {
+          errors.link = "Link must start with http:// or https://";
+        }
+      } catch {
+        errors.link = "Please enter a valid URL";
+      }
+    }
+
+    // Blurb validation
+    if (!data.blurb.trim()) {
+      errors.blurb = "Blurb is required";
+    } else if (data.blurb.trim().length < 10) {
+      errors.blurb = "Blurb must be at least 10 characters";
+    } else if (data.blurb.trim().length > 1000) {
+      errors.blurb = "Blurb must be less than 1000 characters";
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.genre || !formData.link || !formData.blurb) {
+    
+    const errors = validateForm(formData);
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -262,8 +321,10 @@ function AuthenticatedContent() {
 
       // Reset form
       setFormData({ title: "", genre: "", link: "", blurb: "" });
+      setFormErrors({});
       setSelectedImage(null);
       setImagePreview(null);
+      setImageError(null);
       setShowAddForm(false);
     } catch (error) {
       console.error("Error creating recommendation:", error);
@@ -327,6 +388,7 @@ function AuthenticatedContent() {
   const handleEditCancel = () => {
     setEditingRecommendation(null);
     setEditFormData({ title: "", genre: "", link: "", blurb: "" });
+    setEditFormErrors({});
     setEditSelectedImage(null);
     setEditImagePreview(null);
     setEditImageError(null);
@@ -386,7 +448,15 @@ function AuthenticatedContent() {
 
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingRecommendation || !editFormData.title || !editFormData.genre || !editFormData.link || !editFormData.blurb) {
+    
+    if (!editingRecommendation) {
+      return;
+    }
+
+    const errors = validateForm(editFormData);
+    setEditFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
       return;
     }
 
@@ -418,6 +488,7 @@ function AuthenticatedContent() {
       });
 
       // Reset form
+      setEditFormErrors({});
       handleEditCancel();
     } catch (error) {
       const err = error as { message?: string };
@@ -605,7 +676,16 @@ function AuthenticatedContent() {
           )}
         </div>
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            if (showAddForm) {
+              setFormErrors({});
+              setFormData({ title: "", genre: "", link: "", blurb: "" });
+              setSelectedImage(null);
+              setImagePreview(null);
+              setImageError(null);
+            }
+          }}
           className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all"
         >
           <span className="text-base">{showAddForm ? "✕" : "+"}</span>
@@ -623,25 +703,46 @@ function AuthenticatedContent() {
           <div className="flex flex-col gap-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Title
+                Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Enter the title..."
                 value={editFormData.title}
-                onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, title: e.target.value });
+                  if (editFormErrors.title) {
+                    setEditFormErrors({ ...editFormErrors, title: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  editFormErrors.title
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               />
+              {editFormErrors.title && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.title}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Genre
+                Genre <span className="text-red-500">*</span>
               </label>
               <select
                 value={editFormData.genre}
-                onChange={(e) => setEditFormData({ ...editFormData, genre: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, genre: e.target.value });
+                  if (editFormErrors.genre) {
+                    setEditFormErrors({ ...editFormErrors, genre: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  editFormErrors.genre
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               >
                 <option value="">Select a genre...</option>
@@ -651,31 +752,58 @@ function AuthenticatedContent() {
                   </option>
                 ))}
               </select>
+              {editFormErrors.genre && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.genre}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Link (URL)
+                Link (URL) <span className="text-red-500">*</span>
               </label>
               <input
                 type="url"
                 placeholder="https://..."
                 value={editFormData.link}
-                onChange={(e) => setEditFormData({ ...editFormData, link: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, link: e.target.value });
+                  if (editFormErrors.link) {
+                    setEditFormErrors({ ...editFormErrors, link: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  editFormErrors.link
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               />
+              {editFormErrors.link && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.link}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Short Blurb
+                Short Blurb <span className="text-red-500">*</span>
               </label>
               <textarea
                 placeholder="Tell us why you&apos;re hyped about this..."
                 value={editFormData.blurb}
-                onChange={(e) => setEditFormData({ ...editFormData, blurb: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y"
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, blurb: e.target.value });
+                  if (editFormErrors.blurb) {
+                    setEditFormErrors({ ...editFormErrors, blurb: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y ${
+                  editFormErrors.blurb
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               />
+              {editFormErrors.blurb && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.blurb}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -698,11 +826,11 @@ function AuthenticatedContent() {
                 )}
                 {(editImagePreview || (editImageUrl && !editSelectedImage)) && !editImageError && (
                   <div className="relative group">
-                    <div className="w-full h-64 rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
                       <img
                         src={editImagePreview || editImageUrl || ""}
                         alt="Preview"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-center"
                       />
                     </div>
                     <button
@@ -762,25 +890,46 @@ function AuthenticatedContent() {
           <div className="flex flex-col gap-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Title
+                Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Enter the title..."
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                onChange={(e) => {
+                  setFormData({ ...formData, title: e.target.value });
+                  if (formErrors.title) {
+                    setFormErrors({ ...formErrors, title: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  formErrors.title
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               />
+              {formErrors.title && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.title}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Genre
+                Genre <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.genre}
-                onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                onChange={(e) => {
+                  setFormData({ ...formData, genre: e.target.value });
+                  if (formErrors.genre) {
+                    setFormErrors({ ...formErrors, genre: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  formErrors.genre
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               >
                 <option value="">Select a genre...</option>
@@ -790,31 +939,58 @@ function AuthenticatedContent() {
                   </option>
                 ))}
               </select>
+              {formErrors.genre && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.genre}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Link (URL)
+                Link (URL) <span className="text-red-500">*</span>
               </label>
               <input
                 type="url"
                 placeholder="https://..."
                 value={formData.link}
-                onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                onChange={(e) => {
+                  setFormData({ ...formData, link: e.target.value });
+                  if (formErrors.link) {
+                    setFormErrors({ ...formErrors, link: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  formErrors.link
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               />
+              {formErrors.link && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.link}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Short Blurb
+                Short Blurb <span className="text-red-500">*</span>
               </label>
               <textarea
                 placeholder="Tell us why you&apos;re hyped about this..."
                 value={formData.blurb}
-                onChange={(e) => setFormData({ ...formData, blurb: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y"
+                onChange={(e) => {
+                  setFormData({ ...formData, blurb: e.target.value });
+                  if (formErrors.blurb) {
+                    setFormErrors({ ...formErrors, blurb: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y ${
+                  formErrors.blurb
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
                 required
               />
+              {formErrors.blurb && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.blurb}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -837,13 +1013,13 @@ function AuthenticatedContent() {
                 )}
                 {imagePreview && !imageError && (
                   <div className="relative group">
-                    <div className="w-full h-64 rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm">
+                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
                       <img
                         src={imagePreview}
                         alt="Preview"
-                        className="w-full h-full object-cover"
-            />
-          </div>
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
@@ -972,11 +1148,11 @@ function RecommendationCard({
       
       <div className="space-y-4">
         {imageUrl && (
-          <div className="w-full h-56 sm:h-64 rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
             <img
               src={imageUrl}
               alt={recommendation.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
               loading="lazy"
             />
           </div>
@@ -1083,11 +1259,11 @@ function AuthenticatedRecommendationCard({
       
       <div className="space-y-4">
         {imageUrl && (
-          <div className="w-full h-56 sm:h-64 rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
             <img
               src={imageUrl}
               alt={recommendation.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
               loading="lazy"
             />
           </div>
