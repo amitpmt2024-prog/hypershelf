@@ -12,17 +12,17 @@ async function getUserRole(ctx: QueryCtx | MutationCtx) {
     .first();
 
   if (!user) {
-    // Create user with default "user" role if doesn't exist
+    // Create user with default "admin" role if doesn't exist
     // Only mutations can insert, so we'll handle this in mutations
     return null;
   }
 
-  // Default to "user" role if not set (for legacy documents)
-  return { role: user.role ?? "user", userId: user._id };
+  // Default to "admin" role if not set (for legacy documents)
+  return { role: user.role ?? "admin", userId: user._id };
 }
 
 // Helper function to get or create user role (for mutations)
-// First user automatically becomes admin, all others default to "user"
+// All new users default to "admin" role. If manually changed to "user" in database, they have limited access.
 async function getOrCreateUserRole(ctx: MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return null;
@@ -33,12 +33,9 @@ async function getOrCreateUserRole(ctx: MutationCtx) {
     .first();
 
   if (!user) {
-    // Check if this is the first user (no users exist in the database)
-    const allUsers = await ctx.db.query("users").collect();
-    const isFirstUser = allUsers.length === 0;
-
-    // First user becomes admin, all others become "user"
-    const role = isFirstUser ? ("admin" as const) : ("user" as const);
+    // Default role for all new users is "admin"
+    // If you want to limit access, manually change the role to "user" in the database
+    const role = "admin" as const;
 
     const userId = await ctx.db.insert("users", {
       clerkId: identity.subject,
@@ -48,18 +45,17 @@ async function getOrCreateUserRole(ctx: MutationCtx) {
     return { role, userId };
   }
 
-  // Default to "user" role if not set (for legacy documents)
+  // Default to "admin" role if not set (for legacy documents)
   // Also update legacy documents to have a role
   if (!user.role) {
-    // Check if this is the first user (no other users with roles exist)
-    const allUsers = await ctx.db.query("users").collect();
-    const usersWithRoles = allUsers.filter((u) => u.role && u._id !== user._id);
-    const role = usersWithRoles.length === 0 ? ("admin" as const) : ("user" as const);
+    // Default to "admin" for legacy users without a role
+    const role = "admin" as const;
     
     await ctx.db.patch(user._id, { role });
     return { role, userId: user._id };
   }
 
+  // Return the user's role (could be "admin" or "user" if manually changed)
   return { role: user.role, userId: user._id };
 }
 
@@ -349,9 +345,9 @@ export const migrateLegacyUsers = mutation({
     const allUsers = await ctx.db.query("users").collect();
     const legacyUsers = allUsers.filter((user) => !user.role);
 
-    // Update legacy users to have default "user" role
+    // Update legacy users to have default "admin" role
     for (const user of legacyUsers) {
-      await ctx.db.patch(user._id, { role: "user" });
+      await ctx.db.patch(user._id, { role: "admin" });
     }
 
     return { updated: legacyUsers.length };
@@ -412,7 +408,7 @@ export const listAllUsers = query({
       _id: user._id,
       clerkId: user.clerkId,
       name: user.name,
-      role: user.role ?? "user",
+      role: user.role ?? "admin",
       _creationTime: user._creationTime,
     }));
   },

@@ -487,7 +487,7 @@ function AuthenticatedContent() {
         imageId,
       });
 
-      // Reset form
+      // Reset form and redirect back to list
       setEditFormErrors({});
       handleEditCancel();
     } catch (error) {
@@ -660,47 +660,47 @@ function AuthenticatedContent() {
         </div>
       )}
 
-      <div className="flex flex-col gap-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
-            Your HypeShelf
-          </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-            Manage your recommendations and discover new favorites
-          </p>
-          {isAdmin && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
-              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">👑 Admin</span>
+      {/* Edit Mode - Show only edit form */}
+      {editingRecommendation && editingRec ? (
+        <div className="flex flex-col gap-8">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
+                Edit Recommendation
+              </h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Update your recommendation details
+              </p>
             </div>
-          )}
-        </div>
-        <button
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            if (showAddForm) {
-              setFormErrors({});
-              setFormData({ title: "", genre: "", link: "", blurb: "" });
-              setSelectedImage(null);
-              setImagePreview(null);
-              setImageError(null);
-            }
-          }}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all"
-        >
-          <span className="text-base">{showAddForm ? "✕" : "+"}</span>
-          <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
-        </button>
-      </div>
+            <button
+              type="button"
+              onClick={handleEditCancel}
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              <span>Back to List</span>
+            </button>
+          </div>
 
-      {/* Edit Form */}
-      {editingRecommendation && editingRec && (
-        <form
-          onSubmit={handleEditSubmit}
-          className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
-        >
-          <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-50">Edit Recommendation</h3>
-          <div className="flex flex-col gap-5">
+          {/* Edit Form */}
+          <form
+            onSubmit={handleEditSubmit}
+            className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+          >
+            <div className="flex flex-col gap-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Title <span className="text-red-500">*</span>
@@ -860,32 +860,68 @@ function AuthenticatedContent() {
                 )}
               </div>
             </div>
-            <div className="flex gap-3">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleEditCancel}
+                  disabled={updating}
+                  className="flex-1 px-6 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updating}
+                  className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {updating ? "Updating..." : "Update Recommendation"}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      ) : (
+        <>
+          {/* List Mode - Show header, filters, and movie list */}
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+              <div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
+                  Your HypeShelf
+                </h2>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                  Manage your recommendations and discover new favorites
+                </p>
+                {isAdmin && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400">👑 Admin</span>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
-                onClick={handleEditCancel}
-                disabled={updating}
-                className="flex-1 px-6 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => {
+                  setShowAddForm(!showAddForm);
+                  if (showAddForm) {
+                    setFormErrors({});
+                    setFormData({ title: "", genre: "", link: "", blurb: "" });
+                    setSelectedImage(null);
+                    setImagePreview(null);
+                    setImageError(null);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all"
               >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={updating}
-                className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {updating ? "Updating..." : "Update Recommendation"}
+                <span className="text-base">{showAddForm ? "✕" : "+"}</span>
+                <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
               </button>
             </div>
-          </div>
-        </form>
-      )}
 
-      {showAddForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
-        >
+            {showAddForm && (
+              <form
+                onSubmit={handleSubmit}
+                className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+              >
           <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
           <div className="flex flex-col gap-5">
             <div>
@@ -1049,56 +1085,59 @@ function AuthenticatedContent() {
             >
               {uploading ? "Uploading..." : "Submit Recommendation"}
             </button>
-          </div>
-        </form>
-      )}
+            </div>
+          </form>
+            )}
 
-      <div className="flex flex-wrap gap-2.5">
-        {allGenres.map((genre) => (
-          <button
-            key={genre}
-            onClick={() => setSelectedGenre(genre)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-              selectedGenre === genre
-                ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 dark:bg-blue-500"
-                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-            }`}
-          >
-            {genre === "all" ? "All" : genre}
-          </button>
-        ))}
-      </div>
+            <div className="flex flex-wrap gap-2.5">
+              {allGenres.map((genre) => (
+                <button
+                  key={genre}
+                  type="button"
+                  onClick={() => setSelectedGenre(genre)}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    selectedGenre === genre
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 dark:bg-blue-500"
+                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  }`}
+                >
+                  {genre === "all" ? "All" : genre}
+                </button>
+              ))}
+            </div>
 
-      {recommendations.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
-            <span className="text-4xl">📚</span>
+            {recommendations.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
+                  <span className="text-4xl">📚</span>
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                  {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {selectedGenre === "all" 
+                    ? "Be the first to share something you&apos;re hyped about!"
+                    : `Try a different genre or add the first ${selectedGenre} recommendation!`}
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {recommendations.map((rec: typeof recommendations[0]) => (
+                  <AuthenticatedRecommendationCard
+                    key={rec._id}
+                    recommendation={rec}
+                    isAdmin={isAdmin}
+                    currentUserId={currentUserId}
+                    onDelete={handleDeleteClick}
+                    onEdit={handleEditClick}
+                    onToggleStaffPick={handleToggleStaffPickClick}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-            {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
-          </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {selectedGenre === "all" 
-              ? "Be the first to share something you&apos;re hyped about!"
-              : `Try a different genre or add the first ${selectedGenre} recommendation!`}
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {recommendations.map((rec: typeof recommendations[0]) => (
-            <AuthenticatedRecommendationCard
-              key={rec._id}
-              recommendation={rec}
-              isAdmin={isAdmin}
-              currentUserId={currentUserId}
-              onDelete={handleDeleteClick}
-              onEdit={handleEditClick}
-              onToggleStaffPick={handleToggleStaffPickClick}
-            />
-          ))}
-        </div>
+        </>
       )}
-      </div>
     </>
   );
 }
@@ -1301,9 +1340,12 @@ function AuthenticatedRecommendationCard({
           <div className="flex gap-2">
             {isAdmin && (
               <button
-                onClick={() =>
-                  onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title)
-                }
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title);
+                }}
                 className={`p-2 rounded-lg transition-all border-2 ${
                   recommendation.isStaffPick
                     ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
@@ -1329,7 +1371,12 @@ function AuthenticatedRecommendationCard({
             )}
             {canEdit && (
               <button
-                onClick={() => onEdit(recommendation)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onEdit(recommendation);
+                }}
                 className="group p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all border-2 border-transparent hover:border-blue-300 dark:hover:border-blue-700"
                 title={isAdmin ? "Edit (Admin)" : "Edit Your Recommendation"}
               >
@@ -1351,7 +1398,12 @@ function AuthenticatedRecommendationCard({
             )}
             {canDelete && (
               <button
-                onClick={() => onDelete(recommendation._id)}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete(recommendation._id);
+                }}
                 className="group p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all border-2 border-transparent hover:border-red-300 dark:hover:border-red-700"
                 title={isAdmin ? "Delete (Admin)" : "Delete Your Recommendation"}
               >
