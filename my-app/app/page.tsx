@@ -140,6 +140,13 @@ function AuthenticatedContent() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [recommendationToDelete, setRecommendationToDelete] = useState<Id<"recommendations"> | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [staffPickModalOpen, setStaffPickModalOpen] = useState(false);
+  const [recommendationForStaffPick, setRecommendationForStaffPick] = useState<{
+    id: Id<"recommendations">;
+    currentValue: boolean;
+    title: string;
+  } | null>(null);
+  const [togglingStaffPick, setTogglingStaffPick] = useState(false);
   const [editingRecommendation, setEditingRecommendation] = useState<Id<"recommendations"> | null>(null);
   const [editFormData, setEditFormData] = useState({
     title: "",
@@ -421,20 +428,38 @@ function AuthenticatedContent() {
     }
   };
 
-  const handleToggleStaffPick = async (
+  const handleToggleStaffPickClick = (
     id: Id<"recommendations">,
-    currentValue: boolean
+    currentValue: boolean,
+    title: string
   ) => {
+    setRecommendationForStaffPick({ id, currentValue, title });
+    setStaffPickModalOpen(true);
+  };
+
+  const handleToggleStaffPickConfirm = async () => {
+    if (!recommendationForStaffPick) return;
+    
+    setTogglingStaffPick(true);
     try {
       await toggleStaffPick({
-        recommendationId: id,
-        isStaffPick: !currentValue,
+        recommendationId: recommendationForStaffPick.id,
+        isStaffPick: !recommendationForStaffPick.currentValue,
       });
+      setStaffPickModalOpen(false);
+      setRecommendationForStaffPick(null);
     } catch (error) {
       const err = error as { message?: string };
       console.error("Error toggling staff pick:", error);
       alert(err?.message || "Only admins can mark recommendations as Staff Pick");
+    } finally {
+      setTogglingStaffPick(false);
     }
+  };
+
+  const handleToggleStaffPickCancel = () => {
+    setStaffPickModalOpen(false);
+    setRecommendationForStaffPick(null);
   };
 
   if (data === undefined || genres === undefined) {
@@ -487,7 +512,7 @@ function AuthenticatedContent() {
                   Delete Recommendation
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  This action cannot be undone
+                  {isAdmin ? "Admin: Delete any recommendation" : "This action cannot be undone"}
                 </p>
               </div>
             </div>
@@ -508,6 +533,56 @@ function AuthenticatedContent() {
                 className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 rounded-lg transition-all shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Staff Pick Confirmation Modal */}
+      {staffPickModalOpen && recommendationForStaffPick && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={handleToggleStaffPickCancel}
+        >
+          <div 
+            className="bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <span className="text-2xl">⭐</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+                  {recommendationForStaffPick.currentValue ? "Remove Staff Pick" : "Mark as Staff Pick"}
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Admin Action
+                </p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-700 dark:text-slate-300">
+              {recommendationForStaffPick.currentValue 
+                ? `Are you sure you want to remove the Staff Pick status from "${recommendationForStaffPick.title}"?`
+                : `Are you sure you want to mark "${recommendationForStaffPick.title}" as a Staff Pick? This will highlight it as a featured recommendation.`}
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={handleToggleStaffPickCancel}
+                disabled={togglingStaffPick}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleToggleStaffPickConfirm}
+                disabled={togglingStaffPick}
+                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 rounded-lg transition-all shadow-md shadow-amber-500/30 hover:shadow-lg hover:shadow-amber-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {togglingStaffPick 
+                  ? (recommendationForStaffPick.currentValue ? "Removing..." : "Marking...") 
+                  : (recommendationForStaffPick.currentValue ? "Remove Staff Pick" : "Mark as Staff Pick")}
               </button>
             </div>
           </div>
@@ -842,7 +917,7 @@ function AuthenticatedContent() {
               currentUserId={currentUserId}
               onDelete={handleDeleteClick}
               onEdit={handleEditClick}
-              onToggleStaffPick={handleToggleStaffPick}
+              onToggleStaffPick={handleToggleStaffPickClick}
             />
           ))}
         </div>
@@ -973,7 +1048,7 @@ function AuthenticatedRecommendationCard({
     imageId?: Id<"_storage">;
     _creationTime?: number;
   }) => void;
-  onToggleStaffPick: (id: Id<"recommendations">, currentValue: boolean) => void;
+  onToggleStaffPick: (id: Id<"recommendations">, currentValue: boolean, title: string) => void;
 }) {
   const canDelete = isAdmin || recommendation.authorId === currentUserId;
   const canEdit = isAdmin || recommendation.authorId === currentUserId;
@@ -1051,12 +1126,29 @@ function AuthenticatedRecommendationCard({
             {isAdmin && (
               <button
                 onClick={() =>
-                  onToggleStaffPick(recommendation._id, recommendation.isStaffPick)
+                  onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title)
                 }
-                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-all border-2 border-transparent hover:border-amber-300 dark:hover:border-amber-700"
-                title="Toggle Staff Pick"
+                className={`p-2 rounded-lg transition-all border-2 ${
+                  recommendation.isStaffPick
+                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+                    : "bg-slate-100 dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border-transparent hover:border-amber-300 dark:hover:border-amber-700"
+                }`}
+                title={recommendation.isStaffPick ? "Remove Staff Pick" : "Mark as Staff Pick"}
               >
-                {recommendation.isStaffPick ? "⭐" : "☆"}
+                <svg
+                  className="w-5 h-5"
+                  fill={recommendation.isStaffPick ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                  />
+                </svg>
               </button>
             )}
             {canEdit && (
