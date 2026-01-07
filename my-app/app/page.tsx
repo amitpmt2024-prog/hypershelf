@@ -11,18 +11,21 @@ import { SignInButton, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import { Id } from "../convex/_generated/dataModel";
 
+// Predefined movie types
+const MOVIE_TYPES = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Documentary"] as const;
+
 export default function Home() {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border-b border-purple-200/60 dark:border-purple-800/40">
+      <header className="sticky top-0 z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border-b border-blue-200/60 dark:border-blue-800/40">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-purple-600 dark:bg-purple-500 rounded-lg flex items-center justify-center shadow-md shadow-purple-500/20">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
                 <span className="text-white font-bold text-xl">H</span>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-purple-700 dark:text-purple-400 tracking-tight">
+                <h1 className="text-2xl font-bold text-blue-700 dark:text-blue-400 tracking-tight">
                   HypeShelf
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5 hidden sm:block">
@@ -33,9 +36,9 @@ export default function Home() {
             <div suppressHydrationWarning className="flex items-center gap-3">
               <Unauthenticated>
                 <SignInButton mode="modal">
-                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 border-2 border-purple-300 dark:border-purple-700 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border-2 border-blue-300 dark:border-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all">
                     <span>Sign in</span>
-                    <span className="text-purple-600 dark:text-purple-400">→</span>
+                    <span className="text-blue-600 dark:text-blue-400">→</span>
                   </button>
                 </SignInButton>
               </Unauthenticated>
@@ -69,7 +72,7 @@ function PublicContent() {
     return (
       <div className="flex flex-col items-center justify-center py-24">
         <div className="relative">
-          <div className="animate-spin rounded-full h-10 w-10 border-3 border-purple-200 border-t-purple-600"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-200 border-t-blue-600"></div>
         </div>
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading recommendations...</p>
       </div>
@@ -78,33 +81,44 @@ function PublicContent() {
 
   return (
     <div className="flex flex-col gap-12">
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 mb-4 shadow-lg shadow-blue-500/20">
+          <span className="text-3xl">📚</span>
+        </div>
         <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
-          Latest Recommendations
+          Welcome to HypeShelf
         </h2>
-        <p className="text-base text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
-          Discover what others are hyped about
+        <p className="text-lg sm:text-xl text-blue-600 dark:text-blue-400 font-medium max-w-2xl mx-auto">
+          Collect and share the stuff you&apos;re hyped about
         </p>
       </div>
 
       {recommendations.length === 0 ? (
         <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-purple-100 dark:bg-purple-900/40 mb-5">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
             <span className="text-4xl">📚</span>
           </div>
           <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
             No recommendations yet
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
             Be the first to share something you&apos;re hyped about!
           </p>
+          <SignInButton mode="modal">
+            <button className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all">
+              <span>Get Started</span>
+              <span>→</span>
+            </button>
+          </SignInButton>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {recommendations.map((rec) => (
-            <RecommendationCard key={rec._id} recommendation={rec} />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recommendations.map((rec) => (
+              <RecommendationCard key={rec._id} recommendation={rec} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
@@ -427,7 +441,7 @@ function AuthenticatedContent() {
     return (
       <div className="flex flex-col items-center justify-center py-24">
         <div className="relative">
-          <div className="animate-spin rounded-full h-10 w-10 border-3 border-purple-200 border-t-purple-600"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-200 border-t-blue-600"></div>
         </div>
         <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading recommendations...</p>
       </div>
@@ -437,7 +451,7 @@ function AuthenticatedContent() {
   const currentUserId = data.currentUserId || "";
   const userRole = data.userRole || "user";
   const isAdmin = userRole === "admin";
-  const allGenres = ["all", ...genres].filter(Boolean);
+  const allGenres = ["all", ...MOVIE_TYPES];
 
   return (
     <>
@@ -504,8 +518,11 @@ function AuthenticatedContent() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
         <div>
           <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
-            All Recommendations
+            Your HypeShelf
           </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+            Manage your recommendations and discover new favorites
+          </p>
           {isAdmin && (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
               <span className="text-xs font-medium text-amber-700 dark:text-amber-400">👑 Admin</span>
@@ -514,7 +531,7 @@ function AuthenticatedContent() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-md shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/40 transition-all"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all"
         >
           <span className="text-base">{showAddForm ? "✕" : "+"}</span>
           <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
@@ -538,7 +555,7 @@ function AuthenticatedContent() {
                 placeholder="Enter the title..."
                 value={editFormData.title}
                 onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                 required
               />
             </div>
@@ -546,14 +563,19 @@ function AuthenticatedContent() {
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Genre
               </label>
-              <input
-                type="text"
-                placeholder="e.g., horror, action, comedy, drama..."
+              <select
                 value={editFormData.genre}
                 onChange={(e) => setEditFormData({ ...editFormData, genre: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                 required
-              />
+              >
+                <option value="">Select a genre...</option>
+                {MOVIE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -564,7 +586,7 @@ function AuthenticatedContent() {
                 placeholder="https://..."
                 value={editFormData.link}
                 onChange={(e) => setEditFormData({ ...editFormData, link: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                 required
               />
             </div>
@@ -576,7 +598,7 @@ function AuthenticatedContent() {
                 placeholder="Tell us why you&apos;re hyped about this..."
                 value={editFormData.blurb}
                 onChange={(e) => setEditFormData({ ...editFormData, blurb: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none min-h-[120px] resize-y"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y"
                 required
               />
             </div>
@@ -592,7 +614,7 @@ function AuthenticatedContent() {
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                   onChange={handleEditImageChange}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-900/30 dark:file:text-purple-400"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
                 />
                 {editImageError && (
                   <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
@@ -647,7 +669,7 @@ function AuthenticatedContent() {
               <button
                 type="submit"
                 disabled={updating}
-                className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-md shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {updating ? "Updating..." : "Update Recommendation"}
               </button>
@@ -672,7 +694,7 @@ function AuthenticatedContent() {
                 placeholder="Enter the title..."
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                 required
               />
             </div>
@@ -680,14 +702,19 @@ function AuthenticatedContent() {
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Genre
               </label>
-              <input
-                type="text"
-                placeholder="e.g., horror, action, comedy, drama..."
+              <select
                 value={formData.genre}
                 onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                 required
-              />
+              >
+                <option value="">Select a genre...</option>
+                {MOVIE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -698,7 +725,7 @@ function AuthenticatedContent() {
                 placeholder="https://..."
                 value={formData.link}
                 onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                 required
               />
             </div>
@@ -710,7 +737,7 @@ function AuthenticatedContent() {
                 placeholder="Tell us why you&apos;re hyped about this..."
                 value={formData.blurb}
                 onChange={(e) => setFormData({ ...formData, blurb: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none min-h-[120px] resize-y"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y"
                 required
               />
             </div>
@@ -726,7 +753,7 @@ function AuthenticatedContent() {
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                   onChange={handleImageChange}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-900/30 dark:file:text-purple-400"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
                 />
                 {imageError && (
                   <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
@@ -767,7 +794,7 @@ function AuthenticatedContent() {
             <button
               type="submit"
               disabled={uploading}
-              className="w-full px-6 py-3.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-md shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/40 transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {uploading ? "Uploading..." : "Submit Recommendation"}
             </button>
@@ -782,8 +809,8 @@ function AuthenticatedContent() {
             onClick={() => setSelectedGenre(genre)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               selectedGenre === genre
-                ? "bg-purple-600 text-white shadow-md shadow-purple-500/30 dark:bg-purple-500"
-                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 dark:bg-blue-500"
+                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
             }`}
           >
             {genre === "all" ? "All" : genre}
@@ -793,7 +820,7 @@ function AuthenticatedContent() {
 
       {recommendations.length === 0 ? (
         <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-purple-100 dark:bg-purple-900/40 mb-5">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
             <span className="text-4xl">📚</span>
           </div>
           <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
@@ -845,21 +872,20 @@ function RecommendationCard({
   );
 
   const genreColors: Record<string, string> = {
-    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
     action: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    adventure: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
     comedy: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
     drama: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-    thriller: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
-    "sci-fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
-    "sci fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
     romance: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400 border-pink-200 dark:border-pink-800",
+    documentary: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
   };
 
   const genreKey = recommendation.genre.toLowerCase();
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-purple-400 dark:hover:border-purple-500 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
       {recommendation.isStaffPick && (
         <div className="absolute -top-2.5 -right-2.5">
           <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
@@ -884,7 +910,7 @@ function RecommendationCard({
           <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
             {recommendation.genre}
           </span>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             <a
               href={recommendation.link}
               target="_blank"
@@ -901,7 +927,7 @@ function RecommendationCard({
         </p>
         
         <div className="flex items-center gap-2.5 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
-          <div className="w-8 h-8 rounded-lg bg-purple-600 dark:bg-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
             {recommendation.authorName.charAt(0).toUpperCase()}
           </div>
           <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -957,21 +983,20 @@ function AuthenticatedRecommendationCard({
   );
   
   const genreColors: Record<string, string> = {
-    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
     action: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    adventure: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
     comedy: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
     drama: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-    thriller: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
-    "sci-fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
-    "sci fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
     romance: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400 border-pink-200 dark:border-pink-800",
+    documentary: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
   };
 
   const genreKey = recommendation.genre.toLowerCase();
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-purple-400 dark:hover:border-purple-500 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
       {recommendation.isStaffPick && (
         <div className="absolute -top-2.5 -right-2.5 z-10">
           <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
@@ -996,7 +1021,7 @@ function AuthenticatedRecommendationCard({
           <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
             {recommendation.genre}
           </span>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             <a
               href={recommendation.link}
               target="_blank"
@@ -1014,7 +1039,7 @@ function AuthenticatedRecommendationCard({
         
         <div className="flex items-center justify-between pt-3 border-t-2 border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-purple-600 dark:bg-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
               {recommendation.authorName.charAt(0).toUpperCase()}
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400">

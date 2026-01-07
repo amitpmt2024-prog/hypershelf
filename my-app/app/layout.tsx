@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "HypeShelf - Collect and share the stuff you're hyped about",
-  description: "Collect and share the stuff you're hyped about.",
+  description: "Discover amazing recommendations from our community. Share movies, books, games, and more that you're excited about. Join HypeShelf and build your collection of favorites!",
   icons: {
     icon: "/convex.svg",
   },
