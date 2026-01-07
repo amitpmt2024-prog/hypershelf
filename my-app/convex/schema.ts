@@ -10,6 +10,7 @@ export default defineSchema({
     authorId: v.string(),
     authorName: v.string(),
     isStaffPick: v.boolean(),
+    imageId: v.optional(v.id("_storage")),
   })
     .index("by_genre", ["genre"])
     .index("by_author", ["authorId"])

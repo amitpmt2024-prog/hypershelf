@@ -22,6 +22,7 @@ async function getUserRole(ctx: QueryCtx | MutationCtx) {
 }
 
 // Helper function to get or create user role (for mutations)
+// First user automatically becomes admin, all others default to "user"
 async function getOrCreateUserRole(ctx: MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return null;
@@ -32,20 +33,31 @@ async function getOrCreateUserRole(ctx: MutationCtx) {
     .first();
 
   if (!user) {
-    // Create user with default "user" role if doesn't exist
+    // Check if this is the first user (no users exist in the database)
+    const allUsers = await ctx.db.query("users").collect();
+    const isFirstUser = allUsers.length === 0;
+
+    // First user becomes admin, all others become "user"
+    const role = isFirstUser ? ("admin" as const) : ("user" as const);
+
     const userId = await ctx.db.insert("users", {
       clerkId: identity.subject,
-      role: "user",
+      role: role,
       name: identity.name ?? undefined,
     });
-    return { role: "user" as const, userId };
+    return { role, userId };
   }
 
   // Default to "user" role if not set (for legacy documents)
   // Also update legacy documents to have a role
   if (!user.role) {
-    await ctx.db.patch(user._id, { role: "user" });
-    return { role: "user" as const, userId: user._id };
+    // Check if this is the first user (no other users with roles exist)
+    const allUsers = await ctx.db.query("users").collect();
+    const usersWithRoles = allUsers.filter((u) => u.role && u._id !== user._id);
+    const role = usersWithRoles.length === 0 ? ("admin" as const) : ("user" as const);
+    
+    await ctx.db.patch(user._id, { role });
+    return { role, userId: user._id };
   }
 
   return { role: user.role, userId: user._id };
@@ -72,6 +84,7 @@ export const listPublicRecommendations = query({
       blurb: rec.blurb,
       authorName: rec.authorName,
       isStaffPick: rec.isStaffPick,
+      imageId: rec.imageId,
       _creationTime: rec._creationTime,
     }));
   },
@@ -117,6 +130,7 @@ export const listAllRecommendations = query({
         authorId: rec.authorId,
         authorName: rec.authorName,
         isStaffPick: rec.isStaffPick,
+        imageId: rec.imageId,
         _creationTime: rec._creationTime,
       })),
       currentUserId: identity.subject, // Used in return statement
@@ -135,11 +149,39 @@ export const getGenres = query({
   },
 });
 
+// Get image URL from storage ID
+export const getImageUrl = query({
+  args: {
+    imageId: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, args) => {
+    if (!args.imageId) return null;
+    return await ctx.storage.getUrl(args.imageId);
+  },
+});
+
 // Get user role
 export const getUserRoleQuery = query({
   args: {},
   handler: async (ctx) => {
     return await getUserRole(ctx);
+  },
+});
+
+// Generate upload URL for image (authenticated users only)
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    // Ensure user exists in users table
+    await getOrCreateUserRole(ctx);
+
+    // Generate upload URL
+    return await ctx.storage.generateUploadUrl();
   },
 });
 
@@ -150,6 +192,7 @@ export const createRecommendation = mutation({
     genre: v.string(),
     link: v.string(),
     blurb: v.string(),
+    imageId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -168,9 +211,52 @@ export const createRecommendation = mutation({
       authorId: identity.subject,
       authorName: identity.name ?? "Anonymous",
       isStaffPick: false,
+      imageId: args.imageId,
     });
 
     return id;
+  },
+});
+
+// Update a recommendation (users can update own, admins can update any)
+export const updateRecommendation = mutation({
+  args: {
+    recommendationId: v.id("recommendations"),
+    title: v.string(),
+    genre: v.string(),
+    link: v.string(),
+    blurb: v.string(),
+    imageId: v.optional(v.id("_storage")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const recommendation = await ctx.db.get(args.recommendationId);
+    if (!recommendation) {
+      throw new Error("Recommendation not found");
+    }
+
+    const userRole = await getOrCreateUserRole(ctx);
+    const isUserAdmin = userRole?.role === "admin";
+
+    // Users can only update their own recommendations, admins can update any
+    if (!isUserAdmin && recommendation.authorId !== identity.subject) {
+      throw new Error("Not authorized to update this recommendation");
+    }
+
+    // Update the recommendation
+    await ctx.db.patch(args.recommendationId, {
+      title: args.title,
+      genre: args.genre,
+      link: args.link,
+      blurb: args.blurb,
+      imageId: args.imageId,
+    });
+
+    return args.recommendationId;
   },
 });
 
@@ -269,5 +355,65 @@ export const migrateLegacyUsers = mutation({
     }
 
     return { updated: legacyUsers.length };
+  },
+});
+
+// Update user role (admin only) - allows admins to promote/demote users
+export const updateUserRole = mutation({
+  args: {
+    userId: v.id("users"),
+    newRole: v.union(v.literal("admin"), v.literal("user")),
+  },
+  handler: async (ctx, args) => {
+    // Require admin role
+    const currentUserRole = await getOrCreateUserRole(ctx);
+    const isUserAdmin = currentUserRole?.role === "admin";
+    if (!isUserAdmin) {
+      throw new Error("Only admins can update user roles");
+    }
+
+    // Get the user to update
+    const userToUpdate = await ctx.db.get(args.userId);
+    if (!userToUpdate) {
+      throw new Error("User not found");
+    }
+
+    // Prevent admins from demoting themselves (safety check)
+    if (userToUpdate.clerkId === (await ctx.auth.getUserIdentity())?.subject && args.newRole === "user") {
+      throw new Error("You cannot demote yourself from admin role");
+    }
+
+    // Update the user's role
+    await ctx.db.patch(args.userId, { role: args.newRole });
+
+    return { success: true, userId: args.userId, newRole: args.newRole };
+  },
+});
+
+// List all users (admin only) - for admin dashboard
+export const listAllUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userInfo = await getUserRole(ctx);
+    const isUserAdmin = userInfo?.role === "admin";
+    
+    if (!isUserAdmin) {
+      throw new Error("Only admins can view all users");
+    }
+
+    const allUsers = await ctx.db.query("users").collect();
+    
+    return allUsers.map((user) => ({
+      _id: user._id,
+      clerkId: user.clerkId,
+      name: user.name,
+      role: user.role ?? "user",
+      _creationTime: user._creationTime,
+    }));
   },
 });
