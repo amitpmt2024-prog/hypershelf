@@ -1089,51 +1089,55 @@ function AuthenticatedContent() {
           </form>
             )}
 
-            <div className="flex flex-wrap gap-2.5">
-              {allGenres.map((genre) => (
-                <button
-                  key={genre}
-                  type="button"
-                  onClick={() => setSelectedGenre(genre)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                    selectedGenre === genre
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 dark:bg-blue-500"
-                      : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                  }`}
-                >
-                  {genre === "all" ? "All" : genre}
-                </button>
-              ))}
-            </div>
-
-            {recommendations.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
-                  <span className="text-4xl">📚</span>
+            {!showAddForm && (
+              <>
+                <div className="flex flex-wrap gap-2.5">
+                  {allGenres.map((genre) => (
+                    <button
+                      key={genre}
+                      type="button"
+                      onClick={() => setSelectedGenre(genre)}
+                      className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                        selectedGenre === genre
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 dark:bg-blue-500"
+                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      }`}
+                    >
+                      {genre === "all" ? "All" : genre}
+                    </button>
+                  ))}
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                  {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {selectedGenre === "all" 
-                    ? "Be the first to share something you&apos;re hyped about!"
-                    : `Try a different genre or add the first ${selectedGenre} recommendation!`}
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {recommendations.map((rec: typeof recommendations[0]) => (
-                  <AuthenticatedRecommendationCard
-                    key={rec._id}
-                    recommendation={rec}
-                    isAdmin={isAdmin}
-                    currentUserId={currentUserId}
-                    onDelete={handleDeleteClick}
-                    onEdit={handleEditClick}
-                    onToggleStaffPick={handleToggleStaffPickClick}
-                  />
-                ))}
-              </div>
+
+                {recommendations.length === 0 ? (
+                  <div className="text-center py-20">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
+                      <span className="text-4xl">📚</span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                      {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {selectedGenre === "all" 
+                        ? "Be the first to share something you&apos;re hyped about!"
+                        : `Try a different genre or add the first ${selectedGenre} recommendation!`}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {recommendations.map((rec: typeof recommendations[0]) => (
+                      <AuthenticatedRecommendationCard
+                        key={rec._id}
+                        recommendation={rec}
+                        isAdmin={isAdmin}
+                        currentUserId={currentUserId}
+                        onDelete={handleDeleteClick}
+                        onEdit={handleEditClick}
+                        onToggleStaffPick={handleToggleStaffPickClick}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </>
@@ -1175,32 +1179,32 @@ function RecommendationCard({
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="group relative bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
       {recommendation.isStaffPick && (
-        <div className="absolute -top-2.5 -right-2.5">
-          <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
+        <div className="absolute top-2 right-2 z-10">
+          <span className="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
         </div>
       )}
       
-      <div className="space-y-4">
-        {imageUrl && (
-          <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
-            <img
-              src={imageUrl}
-              alt={recommendation.title}
-              className="w-full h-full object-cover object-center"
-              loading="lazy"
-            />
+      <div className="space-y-3">
+        <div className="w-full aspect-[16/9] rounded-md overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center p-1">
+          <img
+            src={imageUrl || "/no-image.png"}
+            alt={recommendation.title}
+            className="max-w-full max-h-full w-auto h-auto object-contain"
+            loading="lazy"
+          />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold border ${genreColor}`}>
+              {recommendation.genre}
+            </span>
           </div>
-        )}
-        <div>
-          <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
-            {recommendation.genre}
-          </span>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
             <a
               href={recommendation.link}
               target="_blank"
@@ -1212,15 +1216,15 @@ function RecommendationCard({
           </h3>
         </div>
         
-        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center gap-2.5 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+        <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+          <div className="w-6 h-6 rounded-md bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-[10px] shadow-sm flex-shrink-0">
             {recommendation.authorName.charAt(0).toUpperCase()}
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
             by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
           </span>
         </div>
@@ -1286,32 +1290,32 @@ function AuthenticatedRecommendationCard({
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="group relative bg-white dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden">
       {recommendation.isStaffPick && (
-        <div className="absolute -top-2.5 -right-2.5 z-10">
-          <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
+        <div className="absolute top-2 right-2 z-10">
+          <span className="inline-flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
         </div>
       )}
       
-      <div className="space-y-4">
-        {imageUrl && (
-          <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
-            <img
-              src={imageUrl}
-              alt={recommendation.title}
-              className="w-full h-full object-cover object-center"
-              loading="lazy"
-            />
+      <div className="space-y-3">
+        <div className="w-full aspect-[16/9] rounded-md overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 flex items-center justify-center p-1">
+          <img
+            src={imageUrl || "/no-image.png"}
+            alt={recommendation.title}
+            className="max-w-full max-h-full w-auto h-auto object-contain"
+            loading="lazy"
+          />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold border ${genreColor}`}>
+              {recommendation.genre}
+            </span>
           </div>
-        )}
-        <div>
-          <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
-            {recommendation.genre}
-          </span>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
             <a
               href={recommendation.link}
               target="_blank"
@@ -1323,21 +1327,21 @@ function AuthenticatedRecommendationCard({
           </h3>
         </div>
         
-        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
+        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center justify-between pt-3 border-t-2 border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+        <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-6 h-6 rounded-md bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-[10px] shadow-sm flex-shrink-0">
               {recommendation.authorName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
               by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
             </span>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-1.5 flex-shrink-0">
             {isAdmin && (
               <button
                 type="button"
@@ -1346,7 +1350,7 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title);
                 }}
-                className={`p-2 rounded-lg transition-all border-2 ${
+                className={`p-1.5 rounded-md transition-all border ${
                   recommendation.isStaffPick
                     ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
                     : "bg-slate-100 dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border-transparent hover:border-amber-300 dark:hover:border-amber-700"
@@ -1354,7 +1358,7 @@ function AuthenticatedRecommendationCard({
                 title={recommendation.isStaffPick ? "Remove Staff Pick" : "Mark as Staff Pick"}
               >
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill={recommendation.isStaffPick ? "currentColor" : "none"}
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1377,11 +1381,11 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onEdit(recommendation);
                 }}
-                className="group p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all border-2 border-transparent hover:border-blue-300 dark:hover:border-blue-700"
+                className="group p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all border border-transparent hover:border-blue-300 dark:hover:border-blue-700"
                 title={isAdmin ? "Edit (Admin)" : "Edit Your Recommendation"}
               >
                 <svg
-                  className="w-5 h-5 transition-transform group-hover:scale-110"
+                  className="w-4 h-4 transition-transform group-hover:scale-110"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1404,11 +1408,11 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onDelete(recommendation._id);
                 }}
-                className="group p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all border-2 border-transparent hover:border-red-300 dark:hover:border-red-700"
+                className="group p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all border border-transparent hover:border-red-300 dark:hover:border-red-700"
                 title={isAdmin ? "Delete (Admin)" : "Delete Your Recommendation"}
               >
                 <svg
-                  className="w-5 h-5 transition-transform group-hover:scale-110"
+                  className="w-4 h-4 transition-transform group-hover:scale-110"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
