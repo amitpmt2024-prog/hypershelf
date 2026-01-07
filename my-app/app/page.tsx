@@ -14,23 +14,31 @@ import { Id } from "../convex/_generated/dataModel";
 export default function Home() {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">H</span>
-                </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+      <header className="sticky top-0 z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border-b border-purple-200/60 dark:border-purple-800/40">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-purple-600 dark:bg-purple-500 rounded-lg flex items-center justify-center shadow-md shadow-purple-500/20">
+                <span className="text-white font-bold text-xl">H</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-purple-700 dark:text-purple-400 tracking-tight">
                   HypeShelf
                 </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5 hidden sm:block">
+                  Collect and share the stuff you&apos;re hyped about
+                </p>
               </div>
-              <p className="hidden sm:block text-sm text-slate-600 dark:text-slate-400 ml-2">
-                Collect and share the stuff you&apos;re hyped about.
-              </p>
             </div>
-            <div suppressHydrationWarning>
+            <div suppressHydrationWarning className="flex items-center gap-3">
+              <Unauthenticated>
+                <SignInButton mode="modal">
+                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-purple-700 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 border-2 border-purple-300 dark:border-purple-700 rounded-lg shadow-sm hover:shadow-md transition-all">
+                    <span>Sign in</span>
+                    <span className="text-purple-600 dark:text-purple-400">→</span>
+                  </button>
+                </SignInButton>
+              </Unauthenticated>
               <Authenticated>
                 <UserButton />
               </Authenticated>
@@ -38,8 +46,8 @@ export default function Home() {
           </div>
         </div>
       </header>
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-purple-950/20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10 sm:py-14">
           <Authenticated>
             <AuthenticatedContent />
           </Authenticated>
@@ -59,57 +67,45 @@ function PublicContent() {
 
   if (recommendations === undefined) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
-        <p className="text-slate-600 dark:text-slate-400">Loading recommendations...</p>
+      <div className="flex flex-col items-center justify-center py-24">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-10 w-10 border-3 border-purple-200 border-t-purple-600"></div>
+        </div>
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading recommendations...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-10">
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent animate-gradient">
+    <div className="flex flex-col gap-12">
+      <div className="text-center space-y-2">
+        <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
           Latest Recommendations
         </h2>
-        <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-          Discover what others are hyped about and join the community
+        <p className="text-base text-slate-600 dark:text-slate-400 max-w-lg mx-auto">
+          Discover what others are hyped about
         </p>
       </div>
 
       {recommendations.length === 0 ? (
         <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-purple-100 dark:bg-purple-900/40 mb-5">
             <span className="text-4xl">📚</span>
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
             No recommendations yet
           </h3>
-          <p className="text-slate-600 dark:text-slate-400 mb-8">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Be the first to share something you&apos;re hyped about!
           </p>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {recommendations.map((rec, index) => (
-            <RecommendationCard 
-              key={rec._id} 
-              recommendation={rec}
-              index={index}
-            />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {recommendations.map((rec) => (
+            <RecommendationCard key={rec._id} recommendation={rec} />
           ))}
         </div>
       )}
-
-      <div className="text-center pt-8">
-        <SignInButton mode="modal">
-          <button className="group relative inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 hover:from-purple-700 hover:to-pink-700">
-            <span className="mr-2">✨</span>
-            Sign in to add yours
-            <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
-          </button>
-        </SignInButton>
-      </div>
     </div>
   );
 }
@@ -177,9 +173,11 @@ function AuthenticatedContent() {
 
   if (data === undefined || genres === undefined) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
-        <p className="text-slate-600 dark:text-slate-400">Loading recommendations...</p>
+      <div className="flex flex-col items-center justify-center py-24">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-10 w-10 border-3 border-purple-200 border-t-purple-600"></div>
+        </div>
+        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading recommendations...</p>
       </div>
     );
   }
@@ -192,22 +190,22 @@ function AuthenticatedContent() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="space-y-2">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
             All Recommendations
           </h2>
           {isAdmin && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
-              <span className="text-amber-600 dark:text-amber-400 font-semibold text-sm">👑 Admin Mode</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">👑 Admin</span>
             </div>
           )}
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="group inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 hover:from-purple-700 hover:to-pink-700"
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-md shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/40 transition-all"
         >
-          <span className="text-xl">{showAddForm ? "✕" : "+"}</span>
+          <span className="text-base">{showAddForm ? "✕" : "+"}</span>
           <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
         </button>
       </div>
@@ -215,12 +213,12 @@ function AuthenticatedContent() {
       {showAddForm && (
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-800/50 p-8 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-lg backdrop-blur-sm"
+          className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
         >
-          <h3 className="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-100">Add New Recommendation</h3>
+          <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
           <div className="flex flex-col gap-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Title
               </label>
               <input
@@ -228,12 +226,12 @@ function AuthenticatedContent() {
                 placeholder="Enter the title..."
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Genre
               </label>
               <input
@@ -241,12 +239,12 @@ function AuthenticatedContent() {
                 placeholder="e.g., horror, action, comedy, drama..."
                 value={formData.genre}
                 onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Link (URL)
               </label>
               <input
@@ -254,25 +252,25 @@ function AuthenticatedContent() {
                 placeholder="https://..."
                 value={formData.link}
                 onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Short Blurb
               </label>
               <textarea
                 placeholder="Tell us why you&apos;re hyped about this..."
                 value={formData.blurb}
                 onChange={(e) => setFormData({ ...formData, blurb: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all min-h-[120px] resize-y"
+                className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all outline-none min-h-[120px] resize-y"
                 required
               />
             </div>
             <button
               type="submit"
-              className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 hover:from-purple-700 hover:to-pink-700"
+              className="w-full px-6 py-3.5 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-md shadow-purple-500/30 hover:shadow-lg hover:shadow-purple-500/40 transition-all mt-2"
             >
               Submit Recommendation
             </button>
@@ -280,38 +278,38 @@ function AuthenticatedContent() {
         </form>
       )}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2.5">
         {allGenres.map((genre) => (
           <button
             key={genre}
             onClick={() => setSelectedGenre(genre)}
-            className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 ${
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
               selectedGenre === genre
-                ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg"
-                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md"
+                ? "bg-purple-600 text-white shadow-md shadow-purple-500/30 dark:bg-purple-500"
+                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20"
             }`}
           >
-            {genre === "all" ? "✨ All" : genre}
+            {genre === "all" ? "All" : genre}
           </button>
         ))}
       </div>
 
       {recommendations.length === 0 ? (
         <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 mb-6">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-purple-100 dark:bg-purple-900/40 mb-5">
             <span className="text-4xl">📚</span>
           </div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
             {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
           </h3>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {selectedGenre === "all" 
               ? "Be the first to share something you&apos;re hyped about!"
               : `Try a different genre or add the first ${selectedGenre} recommendation!`}
           </p>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {recommendations.map((rec: typeof recommendations[0]) => (
             <AuthenticatedRecommendationCard
               key={rec._id}
@@ -330,7 +328,6 @@ function AuthenticatedContent() {
 
 function RecommendationCard({
   recommendation,
-  index = 0,
 }: {
   recommendation: {
     _id: Id<"recommendations">;
@@ -341,30 +338,26 @@ function RecommendationCard({
     authorName: string;
     isStaffPick: boolean;
   };
-  index?: number;
 }) {
   const genreColors: Record<string, string> = {
-    horror: "from-red-500 to-rose-600",
-    action: "from-orange-500 to-amber-600",
-    comedy: "from-yellow-500 to-orange-500",
-    drama: "from-blue-500 to-indigo-600",
-    thriller: "from-purple-500 to-pink-600",
-    "sci-fi": "from-cyan-500 to-blue-600",
-    "sci fi": "from-cyan-500 to-blue-600",
-    romance: "from-pink-500 to-rose-500",
+    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+    action: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    comedy: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+    drama: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+    thriller: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+    "sci-fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    "sci fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    romance: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400 border-pink-200 dark:border-pink-800",
   };
 
   const genreKey = recommendation.genre.toLowerCase();
-  const genreColor = genreColors[genreKey] || "from-slate-500 to-slate-600";
+  const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div 
-      className="group relative bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:border-purple-300 dark:hover:border-purple-700/50 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-      style={{ animationDelay: `${index * 100}ms` }}
-    >
+    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-purple-400 dark:hover:border-purple-500 shadow-sm hover:shadow-md transition-all duration-200">
       {recommendation.isStaffPick && (
-        <div className="absolute -top-3 -right-3">
-          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+        <div className="absolute -top-2.5 -right-2.5">
+          <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
@@ -373,32 +366,31 @@ function RecommendationCard({
       
       <div className="space-y-4">
         <div>
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${genreColor} mb-3`}>
+          <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
             {recommendation.genre}
           </span>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
             <a
               href={recommendation.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline flex items-center gap-2"
+              className="hover:underline"
             >
               {recommendation.title}
-              <span className="text-sm opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
             </a>
           </h3>
         </div>
         
-        <p className="text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3">
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold text-sm">
+        <div className="flex items-center gap-2.5 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+          <div className="w-8 h-8 rounded-lg bg-purple-600 dark:bg-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
             {recommendation.authorName.charAt(0).toUpperCase()}
           </div>
-          <span className="text-sm text-slate-600 dark:text-slate-400">
-            by <span className="font-medium">{recommendation.authorName}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">
+            by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
           </span>
         </div>
       </div>
@@ -431,26 +423,24 @@ function AuthenticatedRecommendationCard({
   const canDelete = isAdmin || recommendation.authorId === currentUserId;
   
   const genreColors: Record<string, string> = {
-    horror: "from-red-500 to-rose-600",
-    action: "from-orange-500 to-amber-600",
-    comedy: "from-yellow-500 to-orange-500",
-    drama: "from-blue-500 to-indigo-600",
-    thriller: "from-purple-500 to-pink-600",
-    "sci-fi": "from-cyan-500 to-blue-600",
-    "sci fi": "from-cyan-500 to-blue-600",
-    romance: "from-pink-500 to-rose-500",
+    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
+    action: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
+    comedy: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+    drama: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
+    thriller: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+    "sci-fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    "sci fi": "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800",
+    romance: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400 border-pink-200 dark:border-pink-800",
   };
 
   const genreKey = recommendation.genre.toLowerCase();
-  const genreColor = genreColors[genreKey] || "from-slate-500 to-slate-600";
+  const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div 
-      className="group relative bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 hover:border-purple-300 dark:hover:border-purple-700/50 shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-    >
+    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-purple-400 dark:hover:border-purple-500 shadow-sm hover:shadow-md transition-all duration-200">
       {recommendation.isStaffPick && (
-        <div className="absolute -top-3 -right-3 z-10">
-          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+        <div className="absolute -top-2.5 -right-2.5 z-10">
+          <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
@@ -459,33 +449,32 @@ function AuthenticatedRecommendationCard({
       
       <div className="space-y-4">
         <div>
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${genreColor} mb-3`}>
+          <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
             {recommendation.genre}
           </span>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
             <a
               href={recommendation.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline flex items-center gap-2"
+              className="hover:underline"
             >
               {recommendation.title}
-              <span className="text-sm opacity-0 group-hover:opacity-100 transition-opacity">↗</span>
             </a>
           </h3>
         </div>
         
-        <p className="text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3">
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold text-sm">
+        <div className="flex items-center justify-between pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-purple-600 dark:bg-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
               {recommendation.authorName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-sm text-slate-600 dark:text-slate-400">
-              by <span className="font-medium">{recommendation.authorName}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
             </span>
           </div>
           
@@ -495,7 +484,7 @@ function AuthenticatedRecommendationCard({
                 onClick={() =>
                   onToggleStaffPick(recommendation._id, recommendation.isStaffPick)
                 }
-                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-all"
+                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 transition-all border-2 border-transparent hover:border-amber-300 dark:hover:border-amber-700"
                 title="Toggle Staff Pick"
               >
                 {recommendation.isStaffPick ? "⭐" : "☆"}
@@ -504,7 +493,7 @@ function AuthenticatedRecommendationCard({
             {canDelete && (
               <button
                 onClick={() => onDelete(recommendation._id)}
-                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all"
+                className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all border-2 border-transparent hover:border-red-300 dark:hover:border-red-700"
                 title={isAdmin ? "Delete (Admin)" : "Delete Your Recommendation"}
               >
                 🗑️
