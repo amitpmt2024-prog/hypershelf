@@ -11,7 +11,6 @@ import { SignInButton, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import { Id } from "../convex/_generated/dataModel";
 
-// Predefined movie types
 const MOVIE_TYPES = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Documentary"] as const;
 
 export default function Home() {
@@ -182,7 +181,6 @@ function AuthenticatedContent() {
   const deleteRec = useMutation(api.myFunctions.deleteRecommendation);
   const toggleStaffPick = useMutation(api.myFunctions.toggleStaffPick);
   
-  // Get editing recommendation and its image URL
   const recommendations = data?.recommendations || [];
   const editingRec = editingRecommendation 
     ? recommendations.find((r) => r._id === editingRecommendation)
@@ -197,24 +195,21 @@ function AuthenticatedContent() {
     setImageError(null);
     
     if (file) {
-      // Validate file type
       const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
         setImageError("Please select a valid image file (JPEG, PNG, WebP, or GIF)");
-        e.target.value = ""; // Clear the input
+        e.target.value = "";
         return;
       }
       
-      // Validate file size (max 2MB for better performance)
-      const maxSize = 2 * 1024 * 1024; // 2MB
+      const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         setImageError(`Image size is ${fileSizeMB}MB. Maximum allowed size is 2MB. Please choose a smaller image.`);
-        e.target.value = ""; // Clear the input
+        e.target.value = "";
         return;
       }
       
-      // Validate image dimensions
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new Image();
@@ -224,20 +219,19 @@ function AuthenticatedContent() {
           
           if (img.width > maxWidth || img.height > maxHeight) {
             setImageError(`Image dimensions are ${img.width}x${img.height}px. Maximum allowed dimensions are ${maxWidth}x${maxHeight}px. Please choose a smaller image.`);
-            e.target.value = ""; // Clear the input
+            e.target.value = "";
             setSelectedImage(null);
             setImagePreview(null);
             return;
           }
           
-          // All validations passed
           setSelectedImage(file);
           setImagePreview(reader.result as string);
           setImageError(null);
         };
         img.onerror = () => {
           setImageError("Invalid image file. Please choose a valid image.");
-          e.target.value = ""; // Clear the input
+          e.target.value = "";
         };
         img.src = reader.result as string;
       };
@@ -248,7 +242,6 @@ function AuthenticatedContent() {
   const validateForm = (data: { title: string; genre: string; link: string; blurb: string }) => {
     const errors: { title?: string; genre?: string; link?: string; blurb?: string } = {};
 
-    // Title validation
     if (!data.title.trim()) {
       errors.title = "Title is required";
     } else if (data.title.trim().length < 3) {
@@ -257,12 +250,10 @@ function AuthenticatedContent() {
       errors.title = "Title must be less than 200 characters";
     }
 
-    // Genre validation
     if (!data.genre) {
       errors.genre = "Please select a genre";
     }
 
-    // Link validation
     if (!data.link.trim()) {
       errors.link = "Link is required";
     } else {
@@ -276,7 +267,6 @@ function AuthenticatedContent() {
       }
     }
 
-    // Blurb validation
     if (!data.blurb.trim()) {
       errors.blurb = "Blurb is required";
     } else if (data.blurb.trim().length < 10) {
@@ -302,7 +292,6 @@ function AuthenticatedContent() {
     try {
       let imageId: Id<"_storage"> | undefined = undefined;
 
-      // Upload image if selected
       if (selectedImage) {
         const uploadUrl = await generateUploadUrl();
         const result = await fetch(uploadUrl, {
@@ -314,13 +303,11 @@ function AuthenticatedContent() {
         imageId = response.storageId as Id<"_storage">;
       }
 
-      // Create recommendation with image
       await createRec({
         ...formData,
         imageId,
       });
 
-      // Reset form
       setFormData({ title: "", genre: "", link: "", blurb: "" });
       setFormErrors({});
       setSelectedImage(null);
@@ -402,7 +389,6 @@ function AuthenticatedContent() {
     setEditImageError(null);
     
     if (file) {
-      // Validate file type
       const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
         setEditImageError("Please select a valid image file (JPEG, PNG, WebP, or GIF)");
@@ -410,7 +396,6 @@ function AuthenticatedContent() {
         return;
       }
       
-      // Validate file size (max 2MB)
       const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
@@ -419,7 +404,6 @@ function AuthenticatedContent() {
         return;
       }
       
-      // Validate image dimensions
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new Image();
@@ -469,7 +453,6 @@ function AuthenticatedContent() {
       let imageId: Id<"_storage"> | undefined = undefined;
       const currentRec = recommendations.find((r) => r._id === editingRecommendation);
 
-      // Upload new image if selected
       if (editSelectedImage) {
         const uploadUrl = await generateUploadUrl();
         const result = await fetch(uploadUrl, {
@@ -480,19 +463,15 @@ function AuthenticatedContent() {
         const response = await result.json();
         imageId = response.storageId as Id<"_storage">;
       } else if (!editImageRemoved && currentRec?.imageId) {
-        // Keep existing image if no new image selected and image wasn't removed
         imageId = currentRec.imageId;
       }
-      // If editImageRemoved is true, imageId remains undefined
 
-      // Update recommendation
       await updateRec({
         recommendationId: editingRecommendation,
         ...editFormData,
         imageId,
       });
 
-      // Reset form and redirect back to list
       setEditFormErrors({});
       handleEditCancel();
     } catch (error) {
@@ -527,7 +506,7 @@ function AuthenticatedContent() {
     } catch (error) {
       const err = error as { message?: string };
       console.error("Error toggling staff pick:", error);
-      alert(err?.message || "Only admins can mark recommendations as Staff Pick");
+      alert(err?.message || "You don't have permission to perform this action");
     } finally {
       setTogglingStaffPick(false);
     }
@@ -556,7 +535,6 @@ function AuthenticatedContent() {
 
   return (
     <>
-      {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
@@ -588,7 +566,7 @@ function AuthenticatedContent() {
                   Delete Recommendation
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {isAdmin ? "Admin: Delete any recommendation" : "This action cannot be undone"}
+                  This action cannot be undone
                 </p>
               </div>
             </div>
@@ -615,7 +593,6 @@ function AuthenticatedContent() {
         </div>
       )}
 
-      {/* Staff Pick Confirmation Modal */}
       {staffPickModalOpen && recommendationForStaffPick && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
@@ -634,7 +611,7 @@ function AuthenticatedContent() {
                   {recommendationForStaffPick.currentValue ? "Remove Staff Pick" : "Mark as Staff Pick"}
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Admin Action
+                  Featured content management
                 </p>
               </div>
             </div>
@@ -665,15 +642,14 @@ function AuthenticatedContent() {
         </div>
       )}
 
-      {/* Edit Mode - Show only edit form */}
       {editingRecommendation && editingRec ? (
         <div className="flex flex-col gap-8">
           <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-1">
                 Edit Recommendation
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 Update your recommendation details
               </p>
             </div>
@@ -700,138 +676,133 @@ function AuthenticatedContent() {
             </button>
           </div>
 
-          {/* Edit Form */}
           <form
             onSubmit={handleEditSubmit}
-            className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+            className="bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
           >
-            <div className="flex flex-col gap-5">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter the title..."
-                value={editFormData.title}
-                onChange={(e) => {
-                  setEditFormData({ ...editFormData, title: e.target.value });
-                  if (editFormErrors.title) {
-                    setEditFormErrors({ ...editFormErrors, title: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                  editFormErrors.title
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              />
-              {editFormErrors.title && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.title}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Genre <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={editFormData.genre}
-                onChange={(e) => {
-                  setEditFormData({ ...editFormData, genre: e.target.value });
-                  if (editFormErrors.genre) {
-                    setEditFormErrors({ ...editFormErrors, genre: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                  editFormErrors.genre
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              >
-                <option value="">Select a genre...</option>
-                {MOVIE_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              {editFormErrors.genre && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.genre}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Link (URL) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="url"
-                placeholder="https://..."
-                value={editFormData.link}
-                onChange={(e) => {
-                  setEditFormData({ ...editFormData, link: e.target.value });
-                  if (editFormErrors.link) {
-                    setEditFormErrors({ ...editFormErrors, link: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                  editFormErrors.link
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              />
-              {editFormErrors.link && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.link}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Short Blurb <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                placeholder="Tell us why you&apos;re hyped about this..."
-                value={editFormData.blurb}
-                onChange={(e) => {
-                  setEditFormData({ ...editFormData, blurb: e.target.value });
-                  if (editFormErrors.blurb) {
-                    setEditFormErrors({ ...editFormErrors, blurb: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y ${
-                  editFormErrors.blurb
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              />
-              {editFormErrors.blurb && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.blurb}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Movie Picture (Optional)
-              </label>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-                Max size: 2MB | Max dimensions: 2000x2000px | Formats: JPEG, PNG, WebP, GIF
-              </p>
-              <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter the title..."
+                  value={editFormData.title}
+                  onChange={(e) => {
+                    setEditFormData({ ...editFormData, title: e.target.value });
+                    if (editFormErrors.title) {
+                      setEditFormErrors({ ...editFormErrors, title: undefined });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                    editFormErrors.title
+                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                  }`}
+                  required
+                />
+                {editFormErrors.title && (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.title}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Genre <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={editFormData.genre}
+                  onChange={(e) => {
+                    setEditFormData({ ...editFormData, genre: e.target.value });
+                    if (editFormErrors.genre) {
+                      setEditFormErrors({ ...editFormErrors, genre: undefined });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                    editFormErrors.genre
+                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                  }`}
+                  required
+                >
+                  <option value="">Select a genre...</option>
+                  {MOVIE_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                {editFormErrors.genre && (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.genre}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Link (URL) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  value={editFormData.link}
+                  onChange={(e) => {
+                    setEditFormData({ ...editFormData, link: e.target.value });
+                    if (editFormErrors.link) {
+                      setEditFormErrors({ ...editFormErrors, link: undefined });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                    editFormErrors.link
+                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                  }`}
+                  required
+                />
+                {editFormErrors.link && (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.link}</p>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Short Blurb <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  placeholder="Tell us why you're hyped about this..."
+                  value={editFormData.blurb}
+                  onChange={(e) => {
+                    setEditFormData({ ...editFormData, blurb: e.target.value });
+                    if (editFormErrors.blurb) {
+                      setEditFormErrors({ ...editFormErrors, blurb: undefined });
+                    }
+                  }}
+                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[80px] resize-y ${
+                    editFormErrors.blurb
+                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                  }`}
+                  required
+                />
+                {editFormErrors.blurb && (
+                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.blurb}</p>
+                )}
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Movie Picture <span className="text-xs font-normal text-slate-500">(Optional, max 2MB)</span>
+                </label>
                 <input
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                   onChange={handleEditImageChange}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
+                  className="w-full px-3 py-2 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
                 />
                 {editImageError && (
-                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
-                    <p className="text-sm text-red-700 dark:text-red-400 font-medium">{editImageError}</p>
+                  <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <p className="text-xs text-red-700 dark:text-red-400">{editImageError}</p>
                   </div>
                 )}
                 {(editImagePreview || (editImageUrl && !editSelectedImage && !editImageRemoved)) && !editImageError && (
-                  <div className="relative group">
-                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+                  <div className="relative group mt-2">
+                    <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
                       <img
                         src={editImagePreview || editImageUrl || ""}
                         alt="Preview"
@@ -848,39 +819,38 @@ function AuthenticatedContent() {
                         const fileInput = document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement;
                         if (fileInput) fileInput.value = "";
                       }}
-                      className="absolute top-3 right-3 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-md border-2 border-red-600"
+                      className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors shadow-md"
                     >
                       Remove
                     </button>
                     {editSelectedImage && (
-                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded backdrop-blur-sm">
+                      <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded backdrop-blur-sm">
                         {(editSelectedImage.size / (1024 * 1024)).toFixed(2)} MB
                       </div>
                     )}
                     {!editSelectedImage && editImageUrl && (
-                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded backdrop-blur-sm">
-                        Current Image
+                      <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded backdrop-blur-sm">
+                        Current
                       </div>
                     )}
                   </div>
                 )}
               </div>
-            </div>
-              <div className="flex gap-3">
+              <div className="md:col-span-2 flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={handleEditCancel}
                   disabled={updating}
-                  className="flex-1 px-6 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updating}
-                  className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {updating ? "Updating..." : "Update Recommendation"}
+                  {updating ? "Updating..." : "Update"}
                 </button>
               </div>
             </div>
@@ -888,7 +858,6 @@ function AuthenticatedContent() {
         </div>
       ) : (
         <>
-          {/* List Mode - Show header, filters, and movie list */}
           <div className="flex flex-col gap-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
               <div>
@@ -898,11 +867,6 @@ function AuthenticatedContent() {
                 <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
                   Manage your recommendations and discover new favorites
                 </p>
-                {isAdmin && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
-                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400">👑 Admin</span>
-                  </div>
-                )}
               </div>
               <button
                 type="button"
@@ -926,173 +890,170 @@ function AuthenticatedContent() {
             {showAddForm && (
               <form
                 onSubmit={handleSubmit}
-                className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+                className="bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
               >
-          <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
-          <div className="flex flex-col gap-5">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Title <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Enter the title..."
-                value={formData.title}
-                onChange={(e) => {
-                  setFormData({ ...formData, title: e.target.value });
-                  if (formErrors.title) {
-                    setFormErrors({ ...formErrors, title: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                  formErrors.title
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              />
-              {formErrors.title && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.title}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Genre <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.genre}
-                onChange={(e) => {
-                  setFormData({ ...formData, genre: e.target.value });
-                  if (formErrors.genre) {
-                    setFormErrors({ ...formErrors, genre: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                  formErrors.genre
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              >
-                <option value="">Select a genre...</option>
-                {MOVIE_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              {formErrors.genre && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.genre}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Link (URL) <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="url"
-                placeholder="https://..."
-                value={formData.link}
-                onChange={(e) => {
-                  setFormData({ ...formData, link: e.target.value });
-                  if (formErrors.link) {
-                    setFormErrors({ ...formErrors, link: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                  formErrors.link
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              />
-              {formErrors.link && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.link}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Short Blurb <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                placeholder="Tell us why you&apos;re hyped about this..."
-                value={formData.blurb}
-                onChange={(e) => {
-                  setFormData({ ...formData, blurb: e.target.value });
-                  if (formErrors.blurb) {
-                    setFormErrors({ ...formErrors, blurb: undefined });
-                  }
-                }}
-                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y ${
-                  formErrors.blurb
-                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                }`}
-                required
-              />
-              {formErrors.blurb && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.blurb}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Movie Picture (Optional)
-              </label>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-                Max size: 2MB | Max dimensions: 2000x2000px | Formats: JPEG, PNG, WebP, GIF
-              </p>
-              <div className="space-y-3">
-                <input
-                  type="file"
-                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                  onChange={handleImageChange}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
-                />
-                {imageError && (
-                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
-                    <p className="text-sm text-red-700 dark:text-red-400 font-medium">{imageError}</p>
-                  </div>
-                )}
-                {imagePreview && !imageError && (
-                  <div className="relative group">
-                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full h-full object-cover object-center"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedImage(null);
-                        setImagePreview(null);
-                        setImageError(null);
-                        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                        if (fileInput) fileInput.value = "";
+                <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter the title..."
+                      value={formData.title}
+                      onChange={(e) => {
+                        setFormData({ ...formData, title: e.target.value });
+                        if (formErrors.title) {
+                          setFormErrors({ ...formErrors, title: undefined });
+                        }
                       }}
-                      className="absolute top-3 right-3 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-md border-2 border-red-600"
+                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                        formErrors.title
+                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                      }`}
+                      required
+                    />
+                    {formErrors.title && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.title}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Genre <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.genre}
+                      onChange={(e) => {
+                        setFormData({ ...formData, genre: e.target.value });
+                        if (formErrors.genre) {
+                          setFormErrors({ ...formErrors, genre: undefined });
+                        }
+                      }}
+                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                        formErrors.genre
+                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                      }`}
+                      required
                     >
-                      Remove
-                    </button>
-                    {selectedImage && (
-                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded backdrop-blur-sm">
-                        {(selectedImage.size / (1024 * 1024)).toFixed(2)} MB
+                      <option value="">Select a genre...</option>
+                      {MOVIE_TYPES.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.genre && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.genre}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Link (URL) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={formData.link}
+                      onChange={(e) => {
+                        setFormData({ ...formData, link: e.target.value });
+                        if (formErrors.link) {
+                          setFormErrors({ ...formErrors, link: undefined });
+                        }
+                      }}
+                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                        formErrors.link
+                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                      }`}
+                      required
+                    />
+                    {formErrors.link && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.link}</p>
+                    )}
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Short Blurb <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      placeholder="Tell us why you're hyped about this..."
+                      value={formData.blurb}
+                      onChange={(e) => {
+                        setFormData({ ...formData, blurb: e.target.value });
+                        if (formErrors.blurb) {
+                          setFormErrors({ ...formErrors, blurb: undefined });
+                        }
+                      }}
+                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[80px] resize-y ${
+                        formErrors.blurb
+                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                      }`}
+                      required
+                    />
+                    {formErrors.blurb && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.blurb}</p>
+                    )}
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                      Movie Picture <span className="text-xs font-normal text-slate-500">(Optional, max 2MB)</span>
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                      onChange={handleImageChange}
+                      className="w-full px-3 py-2 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
+                    />
+                    {imageError && (
+                      <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                        <p className="text-xs text-red-700 dark:text-red-400">{imageError}</p>
+                      </div>
+                    )}
+                    {imagePreview && !imageError && (
+                      <div className="relative group mt-2">
+                        <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-full object-cover object-center"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedImage(null);
+                            setImagePreview(null);
+                            setImageError(null);
+                            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                            if (fileInput) fileInput.value = "";
+                          }}
+                          className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors shadow-md"
+                        >
+                          Remove
+                        </button>
+                        {selectedImage && (
+                          <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded backdrop-blur-sm">
+                            {(selectedImage.size / (1024 * 1024)).toFixed(2)} MB
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            </div>
-            <button
-              type="submit"
-              disabled={uploading}
-              className="w-full px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {uploading ? "Uploading..." : "Submit Recommendation"}
-            </button>
-            </div>
-          </form>
+                  <div className="md:col-span-2">
+                    <button
+                      type="submit"
+                      disabled={uploading}
+                      className="w-full px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploading ? "Uploading..." : "Submit Recommendation"}
+                    </button>
+                  </div>
+                </div>
+              </form>
             )}
 
             {!showAddForm && (
@@ -1388,7 +1349,7 @@ function AuthenticatedRecommendationCard({
                   onEdit(recommendation);
                 }}
                 className="group p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all border border-transparent hover:border-blue-300 dark:hover:border-blue-700"
-                title={isAdmin ? "Edit (Admin)" : "Edit Your Recommendation"}
+                title="Edit recommendation"
               >
                 <svg
                   className="w-4 h-4 transition-transform group-hover:scale-110"
@@ -1415,7 +1376,7 @@ function AuthenticatedRecommendationCard({
                   onDelete(recommendation._id);
                 }}
                 className="group p-1.5 rounded-md bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all border border-transparent hover:border-red-300 dark:hover:border-red-700"
-                title={isAdmin ? "Delete (Admin)" : "Delete Your Recommendation"}
+                title="Delete recommendation"
               >
                 <svg
                   className="w-4 h-4 transition-transform group-hover:scale-110"
