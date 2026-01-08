@@ -1,3 +1,17 @@
+/**
+ * HypeShelf Main Page
+ * 
+ * This is the main application page that displays recommendations
+ * and allows authenticated users to create, edit, and delete recommendations.
+ * 
+ * Features:
+ * - Public view for unauthenticated users
+ * - Full CRUD operations for authenticated users
+ * - Genre filtering
+ * - Image uploads
+ * - Staff pick management (admin only)
+ */
+
 "use client";
 
 import {
@@ -10,8 +24,8 @@ import { api } from "../convex/_generated/api";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { Id } from "../convex/_generated/dataModel";
-
-const MOVIE_TYPES = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Documentary", "Sports", "Biopic"] as const;
+import { MOVIE_TYPES, VALIDATION_LIMITS, ALLOWED_IMAGE_TYPES } from "@/lib/constants";
+import { getErrorMessage, isAuthError, isAuthorizationError } from "@/lib/error-handling";
 
 export default function Home() {
   return (
@@ -358,17 +372,18 @@ function AuthenticatedContent() {
     setImageError(null);
     
     if (file) {
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-      if (!allowedTypes.includes(file.type)) {
+      // Validate file type using constants
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
         setImageError("Please select a valid image file (JPEG, PNG, WebP, or GIF)");
         e.target.value = "";
         return;
       }
       
-      const maxSize = 2 * 1024 * 1024;
-      if (file.size > maxSize) {
+      // Validate file size using constants
+      if (file.size > VALIDATION_LIMITS.IMAGE_MAX_SIZE_BYTES) {
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        setImageError(`Image size is ${fileSizeMB}MB. Maximum allowed size is 2MB. Please choose a smaller image.`);
+        const maxSizeMB = (VALIDATION_LIMITS.IMAGE_MAX_SIZE_BYTES / (1024 * 1024)).toFixed(0);
+        setImageError(`Image size is ${fileSizeMB}MB. Maximum allowed size is ${maxSizeMB}MB. Please choose a smaller image.`);
         e.target.value = "";
         return;
       }
@@ -377,11 +392,13 @@ function AuthenticatedContent() {
       reader.onloadend = () => {
         const img = new Image();
         img.onload = () => {
-          const maxWidth = 2000;
-          const maxHeight = 2000;
-          
-          if (img.width > maxWidth || img.height > maxHeight) {
-            setImageError(`Image dimensions are ${img.width}x${img.height}px. Maximum allowed dimensions are ${maxWidth}x${maxHeight}px. Please choose a smaller image.`);
+          // Validate dimensions using constants
+          if (img.width > VALIDATION_LIMITS.IMAGE_MAX_WIDTH || img.height > VALIDATION_LIMITS.IMAGE_MAX_HEIGHT) {
+            setImageError(
+              `Image dimensions are ${img.width}x${img.height}px. ` +
+              `Maximum allowed dimensions are ${VALIDATION_LIMITS.IMAGE_MAX_WIDTH}x${VALIDATION_LIMITS.IMAGE_MAX_HEIGHT}px. ` +
+              `Please choose a smaller image.`
+            );
             e.target.value = "";
             setSelectedImage(null);
             setImagePreview(null);
@@ -499,9 +516,19 @@ function AuthenticatedContent() {
       setDeleteModalOpen(false);
       setRecommendationToDelete(null);
     } catch (error) {
-      const err = error as { message?: string };
       console.error("Error deleting recommendation:", error);
-      alert(err?.message || "You can only delete your own recommendations");
+      const errorMessage = getErrorMessage(
+        error,
+        "Failed to delete recommendation. Please try again."
+      );
+      
+      if (isAuthError(error)) {
+        alert("Please sign in to delete recommendations.");
+      } else if (isAuthorizationError(error)) {
+        alert("You can only delete your own recommendations.");
+      } else {
+        alert(errorMessage);
+      }
     } finally {
       setDeleting(false);
     }
@@ -552,17 +579,18 @@ function AuthenticatedContent() {
     setEditImageError(null);
     
     if (file) {
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-      if (!allowedTypes.includes(file.type)) {
+      // Validate file type using constants
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type as (typeof ALLOWED_IMAGE_TYPES)[number])) {
         setEditImageError("Please select a valid image file (JPEG, PNG, WebP, or GIF)");
         e.target.value = "";
         return;
       }
       
-      const maxSize = 2 * 1024 * 1024;
-      if (file.size > maxSize) {
+      // Validate file size using constants
+      if (file.size > VALIDATION_LIMITS.IMAGE_MAX_SIZE_BYTES) {
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        setEditImageError(`Image size is ${fileSizeMB}MB. Maximum allowed size is 2MB. Please choose a smaller image.`);
+        const maxSizeMB = (VALIDATION_LIMITS.IMAGE_MAX_SIZE_BYTES / (1024 * 1024)).toFixed(0);
+        setEditImageError(`Image size is ${fileSizeMB}MB. Maximum allowed size is ${maxSizeMB}MB. Please choose a smaller image.`);
         e.target.value = "";
         return;
       }
@@ -571,11 +599,13 @@ function AuthenticatedContent() {
       reader.onloadend = () => {
         const img = new Image();
         img.onload = () => {
-          const maxWidth = 2000;
-          const maxHeight = 2000;
-          
-          if (img.width > maxWidth || img.height > maxHeight) {
-            setEditImageError(`Image dimensions are ${img.width}x${img.height}px. Maximum allowed dimensions are ${maxWidth}x${maxHeight}px. Please choose a smaller image.`);
+          // Validate dimensions using constants
+          if (img.width > VALIDATION_LIMITS.IMAGE_MAX_WIDTH || img.height > VALIDATION_LIMITS.IMAGE_MAX_HEIGHT) {
+            setEditImageError(
+              `Image dimensions are ${img.width}x${img.height}px. ` +
+              `Maximum allowed dimensions are ${VALIDATION_LIMITS.IMAGE_MAX_WIDTH}x${VALIDATION_LIMITS.IMAGE_MAX_HEIGHT}px. ` +
+              `Please choose a smaller image.`
+            );
             e.target.value = "";
             setEditSelectedImage(null);
             setEditImagePreview(null);
@@ -638,9 +668,19 @@ function AuthenticatedContent() {
       setEditFormErrors({});
       handleEditCancel();
     } catch (error) {
-      const err = error as { message?: string };
       console.error("Error updating recommendation:", error);
-      alert(err?.message || "Failed to update recommendation. Please try again.");
+      const errorMessage = getErrorMessage(
+        error,
+        "Failed to update recommendation. Please try again."
+      );
+      
+      if (isAuthError(error)) {
+        alert("Please sign in to update recommendations.");
+      } else if (isAuthorizationError(error)) {
+        alert("You can only update your own recommendations.");
+      } else {
+        alert(errorMessage);
+      }
     } finally {
       setUpdating(false);
     }
@@ -667,9 +707,19 @@ function AuthenticatedContent() {
       setStaffPickModalOpen(false);
       setRecommendationForStaffPick(null);
     } catch (error) {
-      const err = error as { message?: string };
       console.error("Error toggling staff pick:", error);
-      alert(err?.message || "You don't have permission to perform this action");
+      const errorMessage = getErrorMessage(
+        error,
+        "Failed to update staff pick status. Please try again."
+      );
+      
+      if (isAuthError(error)) {
+        alert("Please sign in to manage staff picks.");
+      } else if (isAuthorizationError(error)) {
+        alert("Only admins can mark recommendations as staff picks.");
+      } else {
+        alert(errorMessage);
+      }
     } finally {
       setTogglingStaffPick(false);
     }

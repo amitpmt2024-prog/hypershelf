@@ -1,7 +1,46 @@
+/**
+ * Convex backend functions for HypeShelf
+ * 
+ * This module handles all database operations, authentication, and authorization
+ * for the HypeShelf recommendation platform.
+ * 
+ * Security Notes:
+ * - All new users default to "user" role (not admin) for security
+ * - Input validation is performed on all user inputs
+ * - Authorization checks are enforced on all mutations
+ */
+
 import { v } from "convex/values";
 import { query, mutation, QueryCtx, MutationCtx } from "./_generated/server";
+import {
+  validateString,
+  validateUrl,
+  validateGenre,
+  VALIDATION_LIMITS,
+} from "./validation";
 
-// Helper function to get user role
+/**
+ * Allowed movie/genre types
+ * This should match the frontend MOVIE_TYPES constant
+ */
+const ALLOWED_GENRES = [
+  "Action",
+  "Adventure",
+  "Comedy",
+  "Drama",
+  "Horror",
+  "Romance",
+  "Documentary",
+  "Sports",
+  "Biopic",
+] as const;
+
+/**
+ * Gets the user's role from the database
+ * 
+ * @param ctx - Query or Mutation context
+ * @returns User role and ID, or null if not authenticated
+ */
 async function getUserRole(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return null;
@@ -12,17 +51,24 @@ async function getUserRole(ctx: QueryCtx | MutationCtx) {
     .first();
 
   if (!user) {
-    // Create user with default "admin" role if doesn't exist
-    // Only mutations can insert, so we'll handle this in mutations
+    // User doesn't exist yet - will be created on first mutation
     return null;
   }
 
-  // Default to "admin" role if not set (for legacy documents)
-  return { role: user.role ?? "admin", userId: user._id };
+  // Default to "user" role for security (not admin)
+  // Legacy users without a role will default to "user"
+  return { role: user.role ?? "user", userId: user._id };
 }
 
-// Helper function to get or create user role (for mutations)
-// All new users default to "admin" role. If manually changed to "user" in database, they have limited access.
+/**
+ * Gets or creates a user in the database with default "user" role
+ * 
+ * Security: New users are created with "user" role, not "admin"
+ * Admins must be explicitly promoted by existing admins
+ * 
+ * @param ctx - Mutation context
+ * @returns User role and ID, or null if not authenticated
+ */
 async function getOrCreateUserRole(ctx: MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return null;
@@ -33,40 +79,51 @@ async function getOrCreateUserRole(ctx: MutationCtx) {
     .first();
 
   if (!user) {
-    // Default role for all new users is "admin"
-    // If you want to limit access, manually change the role to "user" in the database
-    const role = "admin" as const;
+    // SECURITY: Default role is "user", not "admin"
+    // Admins must be explicitly promoted by existing admins
+    const role = "user" as const;
+
+    // Sanitize user name if provided
+    const sanitizedName = identity.name
+      ? validateString(identity.name, 1, 100, "User name")
+      : undefined;
 
     const userId = await ctx.db.insert("users", {
       clerkId: identity.subject,
       role: role,
-      name: identity.name ?? undefined,
+      name: sanitizedName,
     });
     return { role, userId };
   }
 
-  // Default to "admin" role if not set (for legacy documents)
-  // Also update legacy documents to have a role
+  // For legacy users without a role, default to "user" for security
   if (!user.role) {
-    // Default to "admin" for legacy users without a role
-    const role = "admin" as const;
-    
+    const role = "user" as const;
     await ctx.db.patch(user._id, { role });
     return { role, userId: user._id };
   }
 
-  // Return the user's role (could be "admin" or "user" if manually changed)
   return { role: user.role, userId: user._id };
 }
 
 
-// Get list of latest public recommendations (read-only)
+/**
+ * Get list of latest public recommendations (read-only)
+ * 
+ * This query is public and doesn't require authentication.
+ * It returns a limited number of recommendations for display.
+ * 
+ * @param count - Optional number of recommendations to return (default: 5, max: 100)
+ * @returns Array of recommendation objects (without authorId for privacy)
+ */
 export const listPublicRecommendations = query({
   args: {
     count: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const count = args.count ?? 5;
+    // Limit count to prevent abuse
+    const count = Math.min(Math.max(1, args.count ?? 5), 100);
+    
     const recommendations = await ctx.db
       .query("recommendations")
       .order("desc")
@@ -86,8 +143,16 @@ export const listPublicRecommendations = query({
   },
 });
 
-// Get all recommendations with optional genre filter (authenticated)
-// Returns recommendations with authorId so users can see if they own each recommendation
+/**
+ * Get all recommendations with optional genre filter (authenticated users only)
+ * 
+ * Returns recommendations with authorId so users can see if they own each recommendation.
+ * This allows the UI to show edit/delete buttons only for the user's own recommendations.
+ * 
+ * @param genre - Optional genre filter (use "all" or omit to get all genres)
+ * @returns Object containing recommendations, current user ID, and user role
+ * @throws Error if user is not authenticated
+ */
 export const listAllRecommendations = query({
   args: {
     genre: v.optional(v.string()),
@@ -104,6 +169,18 @@ export const listAllRecommendations = query({
 
     let recommendations;
     if (args.genre && args.genre !== "all") {
+      // Validate genre if provided
+      try {
+        validateGenre(args.genre, ALLOWED_GENRES);
+      } catch {
+        // If genre is invalid, return empty results
+        return {
+          recommendations: [],
+          currentUserId: identity.subject,
+          userRole: userInfo?.role ?? "user",
+        };
+      }
+
       recommendations = await ctx.db
         .query("recommendations")
         .withIndex("by_genre", (q) => q.eq("genre", args.genre!))
@@ -129,13 +206,20 @@ export const listAllRecommendations = query({
         imageId: rec.imageId,
         _creationTime: rec._creationTime,
       })),
-      currentUserId: identity.subject, // Used in return statement
+      currentUserId: identity.subject,
       userRole: userInfo?.role ?? "user",
     };
   },
 });
 
-// Get available genres for filtering
+/**
+ * Get available genres for filtering
+ * 
+ * Returns a sorted list of all genres that have at least one recommendation.
+ * This is used to populate genre filter dropdowns in the UI.
+ * 
+ * @returns Sorted array of genre strings
+ */
 export const getGenres = query({
   args: {},
   handler: async (ctx) => {
@@ -145,7 +229,15 @@ export const getGenres = query({
   },
 });
 
-// Get image URL from storage ID
+/**
+ * Get image URL from storage ID
+ * 
+ * Converts a Convex storage ID to a publicly accessible URL.
+ * Returns null if no imageId is provided.
+ * 
+ * @param imageId - Optional Convex storage ID
+ * @returns Public URL for the image, or null if no imageId provided
+ */
 export const getImageUrl = query({
   args: {
     imageId: v.optional(v.id("_storage")),
@@ -156,7 +248,14 @@ export const getImageUrl = query({
   },
 });
 
-// Get user role
+/**
+ * Get current user's role
+ * 
+ * Returns the role and user ID for the currently authenticated user.
+ * Used by the frontend to determine what actions the user can perform.
+ * 
+ * @returns Object with role ("admin" or "user") and userId, or null if not authenticated
+ */
 export const getUserRoleQuery = query({
   args: {},
   handler: async (ctx) => {
@@ -164,7 +263,18 @@ export const getUserRoleQuery = query({
   },
 });
 
-// Generate upload URL for image (authenticated users only)
+/**
+ * Generate upload URL for image (authenticated users only)
+ * 
+ * Creates a temporary upload URL that can be used to upload an image to Convex storage.
+ * The URL should be used immediately as it may expire.
+ * 
+ * Note: Image validation (size, type, dimensions) should be done on the frontend
+ * before upload, and ideally also validated on the backend after upload.
+ * 
+ * @returns Temporary upload URL for image upload
+ * @throws Error if user is not authenticated
+ */
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
@@ -181,7 +291,20 @@ export const generateUploadUrl = mutation({
   },
 });
 
-// Create a recommendation (authenticated users only)
+/**
+ * Create a recommendation (authenticated users only)
+ * 
+ * Validates and sanitizes all inputs before storing in the database.
+ * All authenticated users can create recommendations.
+ * 
+ * @param title - Recommendation title (2-200 characters)
+ * @param genre - Movie genre (must be from allowed list)
+ * @param link - URL to the movie/recommendation (must be http/https)
+ * @param blurb - Description of the recommendation (10-1000 characters)
+ * @param imageId - Optional image storage ID
+ * @returns The ID of the created recommendation
+ * @throws Error if validation fails or user is not authenticated
+ */
 export const createRecommendation = mutation({
   args: {
     title: v.string(),
@@ -199,13 +322,37 @@ export const createRecommendation = mutation({
     // Ensure user exists in users table
     await getOrCreateUserRole(ctx);
 
+    // Validate and sanitize all inputs
+    const validatedTitle = validateString(
+      args.title,
+      VALIDATION_LIMITS.TITLE_MIN_LENGTH,
+      VALIDATION_LIMITS.TITLE_MAX_LENGTH,
+      "Title"
+    );
+
+    const validatedGenre = validateGenre(args.genre, ALLOWED_GENRES);
+
+    const validatedLink = validateUrl(args.link);
+
+    const validatedBlurb = validateString(
+      args.blurb,
+      VALIDATION_LIMITS.BLURB_MIN_LENGTH,
+      VALIDATION_LIMITS.BLURB_MAX_LENGTH,
+      "Blurb"
+    );
+
+    // Sanitize author name
+    const authorName = identity.name
+      ? validateString(identity.name, 1, 100, "Author name")
+      : "Anonymous";
+
     const id = await ctx.db.insert("recommendations", {
-      title: args.title,
-      genre: args.genre,
-      link: args.link,
-      blurb: args.blurb,
+      title: validatedTitle,
+      genre: validatedGenre,
+      link: validatedLink,
+      blurb: validatedBlurb,
       authorId: identity.subject,
-      authorName: identity.name ?? "Anonymous",
+      authorName: authorName,
       isStaffPick: false,
       imageId: args.imageId,
     });
@@ -214,7 +361,21 @@ export const createRecommendation = mutation({
   },
 });
 
-// Update a recommendation (users can update own, admins can update any)
+/**
+ * Update a recommendation
+ * 
+ * Authorization: Users can update their own recommendations, admins can update any.
+ * All inputs are validated and sanitized before updating.
+ * 
+ * @param recommendationId - ID of the recommendation to update
+ * @param title - Updated title (2-200 characters)
+ * @param genre - Updated genre (must be from allowed list)
+ * @param link - Updated URL (must be http/https)
+ * @param blurb - Updated description (10-1000 characters)
+ * @param imageId - Optional updated image storage ID
+ * @returns The ID of the updated recommendation
+ * @throws Error if validation fails, recommendation not found, or user not authorized
+ */
 export const updateRecommendation = mutation({
   args: {
     recommendationId: v.id("recommendations"),
@@ -236,19 +397,42 @@ export const updateRecommendation = mutation({
     }
 
     const userRole = await getOrCreateUserRole(ctx);
-    const isUserAdmin = userRole?.role === "admin";
+    if (!userRole) {
+      throw new Error("Not authenticated");
+    }
 
-    // Users can only update their own recommendations, admins can update any
+    const isUserAdmin = userRole.role === "admin";
+
+    // Authorization check: users can only update their own, admins can update any
     if (!isUserAdmin && recommendation.authorId !== identity.subject) {
       throw new Error("Not authorized to update this recommendation");
     }
 
-    // Update the recommendation
+    // Validate and sanitize all inputs
+    const validatedTitle = validateString(
+      args.title,
+      VALIDATION_LIMITS.TITLE_MIN_LENGTH,
+      VALIDATION_LIMITS.TITLE_MAX_LENGTH,
+      "Title"
+    );
+
+    const validatedGenre = validateGenre(args.genre, ALLOWED_GENRES);
+
+    const validatedLink = validateUrl(args.link);
+
+    const validatedBlurb = validateString(
+      args.blurb,
+      VALIDATION_LIMITS.BLURB_MIN_LENGTH,
+      VALIDATION_LIMITS.BLURB_MAX_LENGTH,
+      "Blurb"
+    );
+
+    // Update the recommendation with validated data
     await ctx.db.patch(args.recommendationId, {
-      title: args.title,
-      genre: args.genre,
-      link: args.link,
-      blurb: args.blurb,
+      title: validatedTitle,
+      genre: validatedGenre,
+      link: validatedLink,
+      blurb: validatedBlurb,
       imageId: args.imageId,
     });
 
@@ -256,7 +440,14 @@ export const updateRecommendation = mutation({
   },
 });
 
-// Delete a recommendation (users can delete own, admins can delete any)
+/**
+ * Delete a recommendation
+ * 
+ * Authorization: Users can delete their own recommendations, admins can delete any.
+ * 
+ * @param recommendationId - ID of the recommendation to delete
+ * @throws Error if recommendation not found, user not authenticated, or user not authorized
+ */
 export const deleteRecommendation = mutation({
   args: {
     recommendationId: v.id("recommendations"),
@@ -273,9 +464,13 @@ export const deleteRecommendation = mutation({
     }
 
     const userRole = await getOrCreateUserRole(ctx);
-    const isUserAdmin = userRole?.role === "admin";
+    if (!userRole) {
+      throw new Error("Not authenticated");
+    }
 
-    // Users can only delete their own recommendations, admins can delete any
+    const isUserAdmin = userRole.role === "admin";
+
+    // Authorization check: users can only delete their own, admins can delete any
     if (!isUserAdmin && recommendation.authorId !== identity.subject) {
       throw new Error("Not authorized to delete this recommendation");
     }
@@ -284,7 +479,16 @@ export const deleteRecommendation = mutation({
   },
 });
 
-// Mark/unmark as Staff Pick (admin only)
+/**
+ * Mark/unmark a recommendation as Staff Pick (admin only)
+ * 
+ * Staff picks are featured recommendations that appear prominently in the UI.
+ * Only admins can toggle this status.
+ * 
+ * @param recommendationId - ID of the recommendation to update
+ * @param isStaffPick - Whether to mark as staff pick (true) or remove the mark (false)
+ * @throws Error if user is not an admin, recommendation not found, or user not authenticated
+ */
 export const toggleStaffPick = mutation({
   args: {
     recommendationId: v.id("recommendations"),
@@ -292,8 +496,7 @@ export const toggleStaffPick = mutation({
   },
   handler: async (ctx, args) => {
     const userRole = await getOrCreateUserRole(ctx);
-    const isUserAdmin = userRole?.role === "admin";
-    if (!isUserAdmin) {
+    if (!userRole || userRole.role !== "admin") {
       throw new Error("Only admins can mark recommendations as Staff Pick");
     }
 
@@ -308,13 +511,22 @@ export const toggleStaffPick = mutation({
   },
 });
 
-// Cleanup function to remove old users without clerkId (admin only)
+/**
+ * Cleanup function to remove old users without clerkId (admin only)
+ * 
+ * This function removes users that don't have a Clerk ID, which are likely
+ * from an older authentication system or test data.
+ * 
+ * WARNING: This permanently deletes user records. Use with caution.
+ * 
+ * @returns Number of users deleted
+ * @throws Error if user is not an admin
+ */
 export const cleanupOldUsers = mutation({
   args: {},
   handler: async (ctx) => {
     const userRole = await getOrCreateUserRole(ctx);
-    const isUserAdmin = userRole?.role === "admin";
-    if (!isUserAdmin) {
+    if (!userRole || userRole.role !== "admin") {
       throw new Error("Only admins can run cleanup");
     }
 
@@ -331,13 +543,20 @@ export const cleanupOldUsers = mutation({
   },
 });
 
-// Migration function to fix legacy users (adds default role if missing)
+/**
+ * Migration function to fix legacy users (adds default role if missing)
+ * 
+ * SECURITY: This migration sets legacy users to "user" role, not "admin"
+ * Admins must be explicitly promoted.
+ * 
+ * @returns Number of users updated
+ * @throws Error if user is not an admin
+ */
 export const migrateLegacyUsers = mutation({
   args: {},
   handler: async (ctx) => {
     const userRole = await getOrCreateUserRole(ctx);
-    const isUserAdmin = userRole?.role === "admin";
-    if (!isUserAdmin) {
+    if (!userRole || userRole.role !== "admin") {
       throw new Error("Only admins can run migration");
     }
 
@@ -345,16 +564,26 @@ export const migrateLegacyUsers = mutation({
     const allUsers = await ctx.db.query("users").collect();
     const legacyUsers = allUsers.filter((user) => !user.role);
 
-    // Update legacy users to have default "admin" role
+    // Update legacy users to have default "user" role (not admin)
     for (const user of legacyUsers) {
-      await ctx.db.patch(user._id, { role: "admin" });
+      await ctx.db.patch(user._id, { role: "user" });
     }
 
     return { updated: legacyUsers.length };
   },
 });
 
-// Update user role (admin only) - allows admins to promote/demote users
+/**
+ * Update user role (admin only)
+ * 
+ * Allows admins to promote users to admin or demote admins to regular users.
+ * Includes a safety check to prevent admins from demoting themselves.
+ * 
+ * @param userId - ID of the user whose role should be updated
+ * @param newRole - New role to assign ("admin" or "user")
+ * @returns Success confirmation with updated user ID and role
+ * @throws Error if user is not an admin, user not found, or attempting to demote self
+ */
 export const updateUserRole = mutation({
   args: {
     userId: v.id("users"),
@@ -363,8 +592,7 @@ export const updateUserRole = mutation({
   handler: async (ctx, args) => {
     // Require admin role
     const currentUserRole = await getOrCreateUserRole(ctx);
-    const isUserAdmin = currentUserRole?.role === "admin";
-    if (!isUserAdmin) {
+    if (!currentUserRole || currentUserRole.role !== "admin") {
       throw new Error("Only admins can update user roles");
     }
 
@@ -374,8 +602,9 @@ export const updateUserRole = mutation({
       throw new Error("User not found");
     }
 
-    // Prevent admins from demoting themselves (safety check)
-    if (userToUpdate.clerkId === (await ctx.auth.getUserIdentity())?.subject && args.newRole === "user") {
+    // Safety check: prevent admins from demoting themselves
+    const identity = await ctx.auth.getUserIdentity();
+    if (userToUpdate.clerkId === identity?.subject && args.newRole === "user") {
       throw new Error("You cannot demote yourself from admin role");
     }
 
@@ -386,7 +615,15 @@ export const updateUserRole = mutation({
   },
 });
 
-// List all users (admin only) - for admin dashboard
+/**
+ * List all users (admin only)
+ * 
+ * Returns a list of all users in the system. This is intended for admin dashboards
+ * to manage user roles and view user information.
+ * 
+ * @returns Array of user objects with ID, Clerk ID, name, role, and creation time
+ * @throws Error if user is not authenticated or not an admin
+ */
 export const listAllUsers = query({
   args: {},
   handler: async (ctx) => {
@@ -396,9 +633,7 @@ export const listAllUsers = query({
     }
 
     const userInfo = await getUserRole(ctx);
-    const isUserAdmin = userInfo?.role === "admin";
-    
-    if (!isUserAdmin) {
+    if (!userInfo || userInfo.role !== "admin") {
       throw new Error("Only admins can view all users");
     }
 
@@ -408,7 +643,7 @@ export const listAllUsers = query({
       _id: user._id,
       clerkId: user.clerkId,
       name: user.name,
-      role: user.role ?? "admin",
+      role: user.role ?? "user", // Default to "user" for security
       _creationTime: user._creationTime,
     }));
   },
