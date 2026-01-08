@@ -7,30 +7,27 @@ import {
   useQuery,
 } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { SignInButton, UserButton } from "@clerk/nextjs";
-import { useState } from "react";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { useState, useEffect } from "react";
 import { Id } from "../convex/_generated/dataModel";
 
-const MOVIE_TYPES = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Documentary"] as const;
+const MOVIE_TYPES = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Documentary", "Sports", "Biopic"] as const;
 
 export default function Home() {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 dark:from-blue-500 dark:via-cyan-500 dark:to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 ring-2 ring-blue-500/20">
-                  <span className="text-white font-bold text-lg">H</span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl opacity-0 hover:opacity-20 transition-opacity"></div>
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border-b border-slate-200/50 dark:border-slate-800/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-4">
+              <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 rounded-2xl flex items-center justify-center border-2 border-blue-500/30 dark:border-blue-400/30">
+                <span className="text-white font-bold text-xl">H</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 dark:from-blue-400 dark:via-blue-300 dark:to-blue-500 bg-clip-text text-transparent tracking-tight">
                   HypeShelf
                 </h1>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 -mt-0.5 hidden sm:block">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 hidden sm:block font-medium">
                   Collect and share the stuff you&apos;re hyped about
                 </p>
               </div>
@@ -38,20 +35,20 @@ export default function Home() {
             <div suppressHydrationWarning className="flex items-center gap-3">
               <Unauthenticated>
                 <SignInButton mode="modal">
-                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
+                  <button className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 hover:from-blue-700 hover:via-blue-700 hover:to-blue-700 dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 dark:hover:from-blue-600 dark:hover:via-blue-600 dark:hover:to-blue-600 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer">
                     <span>Sign in</span>
-                    <span>→</span>
+                    <span className="text-lg">→</span>
                   </button>
                 </SignInButton>
               </Unauthenticated>
               <Authenticated>
-                <UserButton />
+                <UserProfileDisplay />
               </Authenticated>
             </div>
           </div>
         </div>
       </header>
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-blue-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10 sm:py-14">
         <Authenticated>
             <AuthenticatedContent />
@@ -65,61 +62,203 @@ export default function Home() {
   );
 }
 
+function UserProfileDisplay() {
+  const { user, isLoaded } = useUser();
+  
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="h-6 w-32 bg-slate-200 dark:bg-slate-700 rounded animate-pulse"></div>
+        <UserButton />
+      </div>
+    );
+  }
+  
+  if (!user) return null;
+  
+  const displayName = user.fullName || user.firstName || user.emailAddresses[0]?.emailAddress || "User";
+  
+  return (
+    <div className="flex items-center gap-3">
+      <div className="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+        <span className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+          Welcome back, <span className="font-bold">{displayName}</span>
+        </span>
+      </div>
+      <UserButton />
+    </div>
+  );
+}
+
+function PaginationControls({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  return (
+    <div className="flex items-center justify-center gap-2 mt-8">
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-slate-800"
+      >
+        Previous
+      </button>
+      
+      <div className="flex items-center gap-1">
+        {getPageNumbers().map((page, index) => {
+          if (page === "...") {
+            return (
+              <span key={`ellipsis-${index}`} className="px-2 text-slate-500 dark:text-slate-400">
+                ...
+              </span>
+            );
+          }
+          
+          const pageNum = page as number;
+          return (
+            <button
+              key={pageNum}
+              onClick={() => onPageChange(pageNum)}
+              className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-pointer ${
+                currentPage === pageNum
+                  ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white border-2 border-blue-500"
+                  : "text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500"
+              }`}
+            >
+              {pageNum}
+            </button>
+          );
+        })}
+      </div>
+      
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white dark:disabled:hover:bg-slate-800"
+      >
+        Next
+      </button>
+    </div>
+  );
+}
+
 function PublicContent() {
-  const recommendations = useQuery(api.myFunctions.listPublicRecommendations, {
-    count: 5,
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  
+  const allRecommendations = useQuery(api.myFunctions.listPublicRecommendations, {
+    count: 1000, // Get a large number for pagination
   });
 
-  if (recommendations === undefined) {
+  if (allRecommendations === undefined) {
     return (
-      <div className="flex flex-col items-center justify-center py-24">
+      <div className="flex flex-col items-center justify-center py-32">
         <div className="relative">
-          <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-200 border-t-blue-600"></div>
+          <div className="absolute inset-0 animate-ping rounded-full bg-blue-400/20"></div>
+          <div className="relative animate-spin rounded-full h-12 w-12 border-4 border-blue-200/50 border-t-blue-600 dark:border-blue-800/50 dark:border-t-blue-400"></div>
         </div>
-        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading recommendations...</p>
+        <p className="mt-6 text-base font-semibold text-slate-600 dark:text-slate-400">Loading recommendations...</p>
       </div>
     );
   }
 
+  // Calculate pagination
+  const totalPages = Math.ceil(allRecommendations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedRecommendations = allRecommendations.slice(startIndex, endIndex);
+
+  // Reset to page 1 if current page is out of bounds
+  if (currentPage > totalPages && totalPages > 0) {
+    setCurrentPage(1);
+  }
+
   return (
     <div className="flex flex-col gap-12">
-      <div className="text-center space-y-4">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 mb-4 shadow-lg shadow-blue-500/20">
-          <span className="text-3xl">📚</span>
+      <div className="text-center space-y-6">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 via-blue-500 to-blue-500 dark:from-blue-400 dark:via-blue-400 dark:to-blue-400 mb-2 ring-4 ring-blue-500/10">
+          <span className="text-4xl">📚</span>
         </div>
-        <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-slate-50 tracking-tight">
+        <h2 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-slate-900 via-blue-900 to-blue-900 dark:from-slate-50 dark:via-blue-50 dark:to-blue-50 bg-clip-text text-transparent tracking-tight">
           Welcome to HypeShelf
         </h2>
-        <p className="text-lg sm:text-xl text-blue-600 dark:text-blue-400 font-medium max-w-2xl mx-auto">
+        <p className="text-xl sm:text-2xl text-slate-700 dark:text-slate-300 font-semibold max-w-2xl mx-auto">
           Collect and share the stuff you&apos;re hyped about
         </p>
       </div>
 
-      {recommendations.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 mb-5 shadow-lg shadow-blue-500/10">
-            <span className="text-4xl">📚</span>
+      {allRecommendations.length === 0 ? (
+        <div className="text-center py-24">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-100 via-blue-100 to-blue-100 dark:from-blue-900/50 dark:via-blue-900/50 dark:to-blue-900/50 mb-6 ring-4 ring-blue-200/30 dark:ring-blue-800/30">
+            <span className="text-5xl">📚</span>
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 mb-3">
             No recommendations yet
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+          <p className="text-base font-medium text-slate-600 dark:text-slate-400 mb-8">
             Be the first to share something you&apos;re hyped about!
           </p>
           <SignInButton mode="modal">
-            <button className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105 active:scale-95">
+            <button className="inline-flex items-center gap-2 px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 hover:from-blue-700 hover:via-blue-700 hover:to-blue-700 dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 dark:hover:from-blue-600 dark:hover:via-blue-600 dark:hover:to-blue-600 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer">
               <span>Get Started</span>
-              <span>→</span>
+              <span className="text-lg">→</span>
             </button>
           </SignInButton>
         </div>
       ) : (
         <>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {recommendations.map((rec) => (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {paginatedRecommendations.map((rec) => (
               <RecommendationCard key={rec._id} recommendation={rec} />
             ))}
           </div>
+          {totalPages > 1 && (
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </>
       )}
     </div>
@@ -128,6 +267,8 @@ function PublicContent() {
 
 function AuthenticatedContent() {
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -184,9 +325,28 @@ function AuthenticatedContent() {
   const deleteRec = useMutation(api.myFunctions.deleteRecommendation);
   const toggleStaffPick = useMutation(api.myFunctions.toggleStaffPick);
   
-  const recommendations = data?.recommendations || [];
+  const allRecommendations = data?.recommendations || [];
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(allRecommendations.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const recommendations = allRecommendations.slice(startIndex, endIndex);
+  
+  // Reset to page 1 when genre changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGenre]);
+  
+  // Reset to page 1 if current page is out of bounds
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [currentPage, totalPages]);
+  
   const editingRec = editingRecommendation 
-    ? recommendations.find((r) => r._id === editingRecommendation)
+    ? allRecommendations.find((r) => r._id === editingRecommendation)
     : null;
   const editImageUrl = useQuery(
     api.myFunctions.getImageUrl,
@@ -247,8 +407,8 @@ function AuthenticatedContent() {
 
     if (!data.title.trim()) {
       errors.title = "Title is required";
-    } else if (data.title.trim().length < 3) {
-      errors.title = "Title must be at least 3 characters";
+    } else if (data.title.trim().length < 2) {
+      errors.title = "Title must be at least 2 characters";
     } else if (data.title.trim().length > 200) {
       errors.title = "Title must be less than 200 characters";
     }
@@ -522,11 +682,12 @@ function AuthenticatedContent() {
 
   if (data === undefined || genres === undefined) {
     return (
-      <div className="flex flex-col items-center justify-center py-24">
+      <div className="flex flex-col items-center justify-center py-32">
         <div className="relative">
-          <div className="animate-spin rounded-full h-10 w-10 border-3 border-blue-200 border-t-blue-600"></div>
+          <div className="absolute inset-0 animate-ping rounded-full bg-blue-400/20"></div>
+          <div className="relative animate-spin rounded-full h-12 w-12 border-4 border-blue-200/50 border-t-blue-600 dark:border-blue-800/50 dark:border-t-blue-400"></div>
         </div>
-        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading recommendations...</p>
+        <p className="mt-6 text-base font-semibold text-slate-600 dark:text-slate-400">Loading recommendations...</p>
       </div>
     );
   }
@@ -540,17 +701,17 @@ function AuthenticatedContent() {
     <>
       {deleteModalOpen && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
           onClick={handleDeleteCancel}
         >
           <div 
-            className="bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full p-6 space-y-4"
+            className="bg-white dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl border-2 border-slate-200/60 dark:border-slate-700/60  max-w-md w-full p-8 space-y-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-rose-100 dark:from-red-900/40 dark:to-rose-900/40 flex items-center justify-center  ring-4 ring-red-200/30 dark:ring-red-800/30">
                 <svg
-                  className="w-6 h-6 text-red-600 dark:text-red-400"
+                  className="w-7 h-7 text-red-600 dark:text-red-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -559,35 +720,35 @@ function AuthenticatedContent() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                   />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+                <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-50">
                   Delete Recommendation
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">
                   This action cannot be undone
                 </p>
               </div>
             </div>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-base text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
               Are you sure you want to delete this recommendation? This will permanently remove it from HypeShelf.
             </p>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handleDeleteCancel}
                 disabled={deleting}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl transition-all duration-300 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteConfirm}
                 disabled={deleting}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 rounded-lg transition-all shadow-md shadow-red-500/30 hover:shadow-lg hover:shadow-red-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-5 py-3 text-sm font-bold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 dark:from-red-500 dark:to-rose-500 dark:hover:from-red-600 dark:hover:to-rose-600 rounded-xl transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] disabled:transform-none"
               >
                 {deleting ? "Deleting..." : "Delete"}
               </button>
@@ -598,27 +759,27 @@ function AuthenticatedContent() {
 
       {staffPickModalOpen && recommendationForStaffPick && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
           onClick={handleToggleStaffPickCancel}
         >
           <div 
-            className="bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full p-6 space-y-4"
+            className="bg-white dark:bg-slate-800/95 backdrop-blur-xl rounded-3xl border-2 border-slate-200/60 dark:border-slate-700/60  max-w-md w-full p-8 space-y-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <span className="text-2xl">⭐</span>
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-yellow-900/40 flex items-center justify-center  ring-4 ring-amber-200/30 dark:ring-amber-800/30">
+                <span className="text-3xl">⭐</span>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50">
+                <h3 className="text-xl font-extrabold text-slate-900 dark:text-slate-50">
                   {recommendationForStaffPick.currentValue ? "Remove Staff Pick" : "Mark as Staff Pick"}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mt-1">
                   Featured content management
                 </p>
               </div>
             </div>
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+            <p className="text-base text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
               {recommendationForStaffPick.currentValue 
                 ? `Are you sure you want to remove the Staff Pick status from "${recommendationForStaffPick.title}"?`
                 : `Are you sure you want to mark "${recommendationForStaffPick.title}" as a Staff Pick? This will highlight it as a featured recommendation.`}
@@ -627,14 +788,14 @@ function AuthenticatedContent() {
               <button
                 onClick={handleToggleStaffPickCancel}
                 disabled={togglingStaffPick}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl transition-all duration-300 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 onClick={handleToggleStaffPickConfirm}
                 disabled={togglingStaffPick}
-                className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-600 rounded-lg transition-all shadow-md shadow-amber-500/30 hover:shadow-lg hover:shadow-amber-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-5 py-3 text-sm font-bold text-white bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 dark:from-amber-400 dark:via-yellow-400 dark:to-amber-500 dark:hover:from-amber-500 dark:hover:via-yellow-500 dark:hover:to-amber-600 rounded-xl transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] disabled:transform-none"
               >
                 {togglingStaffPick 
                   ? (recommendationForStaffPick.currentValue ? "Removing..." : "Marking...") 
@@ -647,19 +808,19 @@ function AuthenticatedContent() {
 
       {editingRecommendation && editingRec ? (
         <div className="flex flex-col gap-8">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between pb-4 border-b-2 border-slate-200/60 dark:border-slate-800/60">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-1">
+              <h2 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 dark:from-blue-400 dark:via-blue-400 dark:to-blue-400 bg-clip-text text-transparent tracking-tight mb-2">
                 Edit Recommendation
               </h2>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                 Update your recommendation details
               </p>
             </div>
             <button
               type="button"
               onClick={handleEditCancel}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-transparent hover:border-slate-300 dark:hover:border-slate-600"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl transition-all duration-300 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 cursor-pointer"
             >
               <svg
                 className="w-5 h-5"
@@ -671,7 +832,7 @@ function AuthenticatedContent() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                   d="M10 19l-7-7m0 0l7-7m-7 7h18"
                 />
               </svg>
@@ -681,11 +842,17 @@ function AuthenticatedContent() {
 
           <form
             onSubmit={handleEditSubmit}
-            className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50"
+            className="bg-white dark:bg-slate-800/95 backdrop-blur-xl p-8 rounded-3xl border-2 border-slate-200/60 dark:border-slate-700/60   dark:0"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-6">
+              <h3 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 dark:from-blue-400 dark:via-blue-400 dark:to-blue-400 bg-clip-text text-transparent mb-2">
+                Edit Recommendation
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Update your recommendation details</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                   Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -698,9 +865,9 @@ function AuthenticatedContent() {
                       setEditFormErrors({ ...editFormErrors, title: undefined });
                     }
                   }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium ${
                     editFormErrors.title
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                       : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                   }`}
                   required
@@ -710,7 +877,7 @@ function AuthenticatedContent() {
                 )}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                   Genre <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -721,9 +888,9 @@ function AuthenticatedContent() {
                       setEditFormErrors({ ...editFormErrors, genre: undefined });
                     }
                   }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium ${
                     editFormErrors.genre
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                       : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                   }`}
                   required
@@ -740,7 +907,7 @@ function AuthenticatedContent() {
                 )}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                   Link (URL) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -753,9 +920,9 @@ function AuthenticatedContent() {
                       setEditFormErrors({ ...editFormErrors, link: undefined });
                     }
                   }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium ${
                     editFormErrors.link
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                       : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                   }`}
                   required
@@ -765,7 +932,7 @@ function AuthenticatedContent() {
                 )}
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                   Short Blurb <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -777,9 +944,9 @@ function AuthenticatedContent() {
                       setEditFormErrors({ ...editFormErrors, blurb: undefined });
                     }
                   }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[80px] resize-y ${
+                  className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium min-h-[80px] resize-y ${
                     editFormErrors.blurb
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                      ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                       : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                   }`}
                   required
@@ -789,14 +956,14 @@ function AuthenticatedContent() {
                 )}
               </div>
               <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                   Movie Picture <span className="text-xs font-normal text-slate-500">(Optional, max 2MB)</span>
                 </label>
                 <input
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                   onChange={handleEditImageChange}
-                  className="w-full px-3 py-2 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
+                  className="w-full px-4 py-3 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
                 />
                 {editImageError && (
                   <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
@@ -805,7 +972,7 @@ function AuthenticatedContent() {
                 )}
                 {(editImagePreview || (editImageUrl && !editSelectedImage && !editImageRemoved)) && !editImageError && (
                   <div className="relative group mt-2">
-                    <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+                    <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700  bg-slate-100 dark:bg-slate-900">
                       <img
                         src={editImagePreview || editImageUrl || ""}
                         alt="Preview"
@@ -822,7 +989,7 @@ function AuthenticatedContent() {
                         const fileInput = document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement;
                         if (fileInput) fileInput.value = "";
                       }}
-                      className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors shadow-md"
+                      className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors cursor-pointer"
                     >
                       Remove
                     </button>
@@ -844,14 +1011,14 @@ function AuthenticatedContent() {
                   type="button"
                   onClick={handleEditCancel}
                   disabled={updating}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-5 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700/90 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-xl transition-all duration-300 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={updating}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="flex-1 px-5 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 hover:from-blue-700 hover:via-blue-700 hover:to-blue-700 dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 dark:hover:from-blue-600 dark:hover:via-blue-600 dark:hover:to-blue-600 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   {updating ? "Updating..." : "Update"}
                 </button>
@@ -875,7 +1042,7 @@ function AuthenticatedContent() {
                     setImageError(null);
                   }
                 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 hover:from-blue-700 hover:via-blue-700 hover:to-blue-700 dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 dark:hover:from-blue-600 dark:hover:via-blue-600 dark:hover:to-blue-600 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105 active:scale-95"
               >
                 <span className="text-base">{showAddForm ? "✕" : "+"}</span>
                 <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
@@ -885,12 +1052,17 @@ function AuthenticatedContent() {
             {showAddForm && (
               <form
                 onSubmit={handleSubmit}
-                className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50"
+                className="bg-white dark:bg-slate-800/95 backdrop-blur-xl p-8 rounded-3xl border-2 border-slate-200/60 dark:border-slate-700/60   dark:0"
               >
-                <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
+                <div className="mb-6">
+                  <h3 className="text-2xl font-extrabold bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 dark:from-blue-400 dark:via-blue-400 dark:to-blue-400 bg-clip-text text-transparent mb-2">
+                    Add New Recommendation
+                  </h3>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">Share something amazing with the community</p>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                       Title <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -903,9 +1075,9 @@ function AuthenticatedContent() {
                           setFormErrors({ ...formErrors, title: undefined });
                         }
                       }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                      className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium ${
                         formErrors.title
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                           : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                       }`}
                       required
@@ -915,7 +1087,7 @@ function AuthenticatedContent() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                       Genre <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -926,9 +1098,9 @@ function AuthenticatedContent() {
                           setFormErrors({ ...formErrors, genre: undefined });
                         }
                       }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                      className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium ${
                         formErrors.genre
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                           : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                       }`}
                       required
@@ -945,7 +1117,7 @@ function AuthenticatedContent() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                       Link (URL) <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -958,9 +1130,9 @@ function AuthenticatedContent() {
                           setFormErrors({ ...formErrors, link: undefined });
                         }
                       }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                      className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium ${
                         formErrors.link
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                           : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                       }`}
                       required
@@ -970,7 +1142,7 @@ function AuthenticatedContent() {
                     )}
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                       Short Blurb <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -982,9 +1154,9 @@ function AuthenticatedContent() {
                           setFormErrors({ ...formErrors, blurb: undefined });
                         }
                       }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[80px] resize-y ${
+                      className={`w-full px-4 py-3 text-sm rounded-xl border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none font-medium min-h-[80px] resize-y ${
                         formErrors.blurb
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                          ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20"
                           : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
                       }`}
                       required
@@ -994,14 +1166,14 @@ function AuthenticatedContent() {
                     )}
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
                       Movie Picture <span className="text-xs font-normal text-slate-500">(Optional, max 2MB)</span>
                     </label>
                     <input
                       type="file"
                       accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                       onChange={handleImageChange}
-                      className="w-full px-3 py-2 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
+                      className="w-full px-4 py-3 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
                     />
                     {imageError && (
                       <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
@@ -1010,7 +1182,7 @@ function AuthenticatedContent() {
                     )}
                     {imagePreview && !imageError && (
                       <div className="relative group mt-2">
-                        <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+                        <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700  bg-slate-100 dark:bg-slate-900">
                           <img
                             src={imagePreview}
                             alt="Preview"
@@ -1026,7 +1198,7 @@ function AuthenticatedContent() {
                             const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
                             if (fileInput) fileInput.value = "";
                           }}
-                          className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors shadow-md"
+                          className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors cursor-pointer"
                         >
                           Remove
                         </button>
@@ -1042,7 +1214,7 @@ function AuthenticatedContent() {
                     <button
                       type="submit"
                       disabled={uploading}
-                      className="w-full px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      className="w-full px-6 py-3.5 text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 hover:from-blue-700 hover:via-blue-700 hover:to-blue-700 dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 dark:hover:from-blue-600 dark:hover:via-blue-600 dark:hover:to-blue-600 rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
                       {uploading ? "Uploading..." : "Submit Recommendation"}
                     </button>
@@ -1059,10 +1231,10 @@ function AuthenticatedContent() {
                       key={genre}
                       type="button"
                       onClick={() => setSelectedGenre(genre)}
-                      className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                      className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 cursor-pointer ${
                         selectedGenre === genre
-                          ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:from-blue-500 dark:to-cyan-500 ring-2 ring-blue-400/20 transform scale-105"
-                          : "bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/10 shadow-sm hover:shadow-md"
+                          ? "bg-gradient-to-r from-blue-600 via-blue-600 to-blue-600 text-white   dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 ring-2 ring-blue-400/30 transform scale-105"
+                          : "bg-white dark:bg-slate-800/90 backdrop-blur-sm text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-50 hover:to-blue-50 dark:hover:from-blue-900/30 dark:hover:to-blue-900/20 dark:hover:to-blue-900/20"
                       }`}
                     >
                       {genre === "all" ? "All" : genre}
@@ -1072,32 +1244,41 @@ function AuthenticatedContent() {
 
                 {recommendations.length === 0 ? (
                   <div className="text-center py-20">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 mb-5 shadow-lg shadow-blue-500/10">
-                      <span className="text-4xl">📚</span>
+                    <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-100 via-blue-100 to-blue-100 dark:from-blue-900/50 dark:via-blue-900/50 dark:to-blue-900/50 mb-6   ring-4 ring-blue-200/30 dark:ring-blue-800/30">
+                      <span className="text-5xl">📚</span>
                     </div>
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                    <h3 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 mb-3">
                       {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
                     </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-base font-medium text-slate-600 dark:text-slate-400">
                       {selectedGenre === "all" 
                         ? "Be the first to share something you&apos;re hyped about!"
                         : `Try a different genre or add the first ${selectedGenre} recommendation!`}
                     </p>
                   </div>
                 ) : (
-                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {recommendations.map((rec: typeof recommendations[0]) => (
-                      <AuthenticatedRecommendationCard
-                        key={rec._id}
-                        recommendation={rec}
-                        isAdmin={isAdmin}
-                        currentUserId={currentUserId}
-                        onDelete={handleDeleteClick}
-                        onEdit={handleEditClick}
-                        onToggleStaffPick={handleToggleStaffPickClick}
+                  <>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      {recommendations.map((rec: typeof allRecommendations[0]) => (
+                        <AuthenticatedRecommendationCard
+                          key={rec._id}
+                          recommendation={rec}
+                          isAdmin={isAdmin}
+                          currentUserId={currentUserId}
+                          onDelete={handleDeleteClick}
+                          onEdit={handleEditClick}
+                          onToggleStaffPick={handleToggleStaffPickClick}
+                        />
+                      ))}
+                    </div>
+                    {totalPages > 1 && (
+                      <PaginationControls
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
                       />
-                    ))}
-                  </div>
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -1128,45 +1309,47 @@ function RecommendationCard({
   );
 
   const genreColors: Record<string, string> = {
-    action: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
-    adventure: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-    comedy: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
-    drama: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
-    romance: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400 border-pink-200 dark:border-pink-800",
-    documentary: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+    action: "bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 dark:from-orange-900/40 dark:to-red-900/40 dark:text-orange-300 border-2 border-orange-300 dark:border-orange-700",
+    adventure: "bg-gradient-to-r from-blue-100 to-blue-100 text-blue-800 dark:from-blue-900/40 dark:to-blue-900/40 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700",
+    comedy: "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 dark:from-yellow-900/40 dark:to-amber-900/40 dark:text-yellow-300 border-2 border-yellow-300 dark:border-yellow-700",
+    drama: "bg-gradient-to-r from-blue-100 to-blue-100 text-blue-800 dark:from-blue-900/40 dark:to-blue-900/40 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700",
+    horror: "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 dark:from-red-900/40 dark:to-rose-900/40 dark:text-red-300 border-2 border-red-300 dark:border-red-700",
+    romance: "bg-gradient-to-r from-pink-100 to-rose-100 text-pink-800 dark:from-pink-900/40 dark:to-rose-900/40 dark:text-pink-300 border-2 border-pink-300 dark:border-pink-700",
+    documentary: "bg-gradient-to-r from-blue-100 to-blue-100 text-blue-800 dark:from-blue-900/40 dark:to-blue-900/40 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700",
+    sports: "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 dark:from-green-900/40 dark:to-emerald-900/40 dark:text-green-300 border-2 border-green-300 dark:border-green-700",
+    biopic: "bg-gradient-to-r from-violet-100 to-purple-100 text-violet-800 dark:from-violet-900/40 dark:to-purple-900/40 dark:text-violet-300 border-2 border-violet-300 dark:border-violet-700",
   };
 
   const genreKey = recommendation.genre.toLowerCase();
-  const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
+  const genreColor = genreColors[genreKey] || "bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 dark:from-slate-800 dark:to-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-600";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600/50 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-slate-800/95 p-6 rounded-3xl border-2 border-slate-200/60 dark:border-slate-700/60 hover:border-blue-400 dark:hover:border-blue-500  hover: hover: dark:hover: transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-2">
       {recommendation.isStaffPick && (
-        <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/20">
-            <span>⭐</span>
+        <div className="absolute top-4 right-4 z-10">
+          <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl   ring-2 ring-amber-300/50">
+            <span className="text-sm">⭐</span>
             <span>Staff Pick</span>
           </span>
         </div>
       )}
       
-      <div className="space-y-3">
-        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-1 group-hover:border-blue-300 dark:group-hover:border-blue-600/50 transition-colors">
+      <div className="space-y-4">
+        <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border-2 border-slate-200/40 dark:border-slate-700/40 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-all duration-300  group-hover:">
           <img
             src={imageUrl || "/no-image.png"}
             alt={recommendation.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
             loading="lazy"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${genreColor} shadow-sm`}>
+            <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold border-2 ${genreColor} `}>
               {recommendation.genre}
             </span>
           </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
             <a
               href={recommendation.link}
               target="_blank"
@@ -1178,16 +1361,16 @@ function RecommendationCard({
           </h3>
         </div>
         
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3 font-medium">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-500/30 flex-shrink-0 ring-1 ring-blue-500/20">
+        <div className="flex items-center gap-2.5 pt-4 border-t-2 border-slate-200/60 dark:border-slate-700/60">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-600 dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 flex items-center justify-center text-white font-extrabold text-sm   flex-shrink-0 ring-2 ring-blue-400/30">
             {recommendation.authorName.charAt(0).toUpperCase()}
           </div>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-            by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
+          <span className="text-xs text-slate-600 dark:text-slate-400 truncate font-medium">
+            by <span className="font-bold text-slate-800 dark:text-slate-200">{recommendation.authorName}</span>
           </span>
         </div>
       </div>
@@ -1231,53 +1414,55 @@ function AuthenticatedRecommendationCard({
   }) => void;
   onToggleStaffPick: (id: Id<"recommendations">, currentValue: boolean, title: string) => void;
 }) {
-  const canDelete = isAdmin || recommendation.authorId === currentUserId;
-  const canEdit = isAdmin || recommendation.authorId === currentUserId;
+  const canDelete = isAdmin || recommendation.authorId === currentUserId; // Admins can delete any, users can delete their own
+  const canEdit = isAdmin || recommendation.authorId === currentUserId; // Admins can edit any, users can edit their own
   const imageUrl = useQuery(
     api.myFunctions.getImageUrl,
     recommendation.imageId ? { imageId: recommendation.imageId } : "skip"
   );
   
   const genreColors: Record<string, string> = {
-    action: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800",
-    adventure: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-    comedy: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
-    drama: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-    horror: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
-    romance: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400 border-pink-200 dark:border-pink-800",
-    documentary: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800",
+    action: "bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 dark:from-orange-900/40 dark:to-red-900/40 dark:text-orange-300 border-2 border-orange-300 dark:border-orange-700",
+    adventure: "bg-gradient-to-r from-blue-100 to-blue-100 text-blue-800 dark:from-blue-900/40 dark:to-blue-900/40 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700",
+    comedy: "bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 dark:from-yellow-900/40 dark:to-amber-900/40 dark:text-yellow-300 border-2 border-yellow-300 dark:border-yellow-700",
+    drama: "bg-gradient-to-r from-blue-100 to-blue-100 text-blue-800 dark:from-blue-900/40 dark:to-blue-900/40 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700",
+    horror: "bg-gradient-to-r from-red-100 to-rose-100 text-red-800 dark:from-red-900/40 dark:to-rose-900/40 dark:text-red-300 border-2 border-red-300 dark:border-red-700",
+    romance: "bg-gradient-to-r from-pink-100 to-rose-100 text-pink-800 dark:from-pink-900/40 dark:to-rose-900/40 dark:text-pink-300 border-2 border-pink-300 dark:border-pink-700",
+    documentary: "bg-gradient-to-r from-blue-100 to-blue-100 text-blue-800 dark:from-blue-900/40 dark:to-blue-900/40 dark:text-blue-300 border-2 border-blue-300 dark:border-blue-700",
+    sports: "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 dark:from-green-900/40 dark:to-emerald-900/40 dark:text-green-300 border-2 border-green-300 dark:border-green-700",
+    biopic: "bg-gradient-to-r from-violet-100 to-purple-100 text-violet-800 dark:from-violet-900/40 dark:to-purple-900/40 dark:text-violet-300 border-2 border-violet-300 dark:border-violet-700",
   };
 
   const genreKey = recommendation.genre.toLowerCase();
-  const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
+  const genreColor = genreColors[genreKey] || "bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 dark:from-slate-800 dark:to-slate-700 dark:text-slate-300 border-2 border-slate-300 dark:border-slate-600";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600/50 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-slate-800/95 p-6 rounded-3xl border-2 border-slate-200/60 dark:border-slate-700/60 hover:border-blue-400 dark:hover:border-blue-500  hover: hover: dark:hover: transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-2">
       {recommendation.isStaffPick && (
-        <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/20">
-            <span>⭐</span>
+        <div className="absolute top-4 right-4 z-10">
+          <span className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl   ring-2 ring-amber-300/50">
+            <span className="text-sm">⭐</span>
             <span>Staff Pick</span>
           </span>
         </div>
       )}
       
-      <div className="space-y-3">
-        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-1 group-hover:border-blue-300 dark:group-hover:border-blue-600/50 transition-colors">
+      <div className="space-y-4">
+        <div className="w-full aspect-[4/3] rounded-2xl overflow-hidden border-2 border-slate-200/40 dark:border-slate-700/40 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 group-hover:border-blue-400 dark:group-hover:border-blue-500 transition-all duration-300  group-hover:">
           <img
             src={imageUrl || "/no-image.png"}
             alt={recommendation.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500"
             loading="lazy"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${genreColor} shadow-sm`}>
+            <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-extrabold border-2 ${genreColor} `}>
               {recommendation.genre}
             </span>
           </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+          <h3 className="text-lg font-extrabold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
             <a
               href={recommendation.link}
               target="_blank"
@@ -1289,21 +1474,21 @@ function AuthenticatedRecommendationCard({
           </h3>
         </div>
         
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-3 font-medium">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-500/30 flex-shrink-0 ring-1 ring-blue-500/20">
+        <div className="flex items-center justify-between pt-4 border-t-2 border-slate-200/60 dark:border-slate-700/60">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-600 dark:from-blue-500 dark:via-blue-500 dark:to-blue-500 flex items-center justify-center text-white font-extrabold text-sm   flex-shrink-0 ring-2 ring-blue-400/30">
               {recommendation.authorName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
-              by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 truncate font-medium">
+              by <span className="font-bold text-slate-800 dark:text-slate-200">{recommendation.authorName}</span>
             </span>
           </div>
           
-          <div className="flex gap-1.5 flex-shrink-0">
+          <div className="flex gap-2 flex-shrink-0">
             {isAdmin && (
               <button
                 type="button"
@@ -1312,10 +1497,10 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title);
                 }}
-                className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md ${
+                className={`p-2.5 rounded-xl transition-all duration-300 cursor-pointer ${
                   recommendation.isStaffPick
-                    ? "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/40 dark:to-amber-800/20 text-amber-600 dark:text-amber-400 border border-amber-300/50 dark:border-amber-700/50 ring-1 ring-amber-400/20"
-                    : "bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-amber-50 hover:to-amber-100/50 dark:hover:from-amber-900/30 dark:hover:to-amber-800/10 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border border-transparent hover:border-amber-300/50 dark:hover:border-amber-700/50"
+                    ? "bg-gradient-to-br from-amber-200 to-yellow-200 dark:from-amber-800/60 dark:to-yellow-800/60 text-amber-700 dark:text-amber-300 border-2 border-amber-400/60 dark:border-amber-600/60 ring-2 ring-amber-300/30"
+                    : "bg-white dark:bg-slate-700/90 hover:bg-gradient-to-br hover:from-amber-50 hover:to-yellow-50 dark:hover:from-amber-900/40 dark:hover:to-yellow-900/20 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-300 border-2 border-slate-200 dark:border-slate-600 hover:border-amber-400/60 dark:hover:border-amber-600/60"
                 }`}
                 title={recommendation.isStaffPick ? "Remove Staff Pick" : "Mark as Staff Pick"}
               >
@@ -1343,7 +1528,7 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onEdit(recommendation);
                 }}
-                className="group p-2 rounded-lg bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/20 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 border border-transparent hover:border-blue-300/50 dark:hover:border-blue-700/50 shadow-sm hover:shadow-md"
+                className="group p-2.5 rounded-xl bg-white dark:bg-slate-700/90 hover:bg-gradient-to-br hover:from-blue-50 hover:to-blue-50 dark:hover:from-blue-900/40 dark:hover:to-blue-900/20 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 border-2 border-slate-200 dark:border-slate-600 hover:border-blue-400/60 dark:hover:border-blue-600/60 cursor-pointer"
                 title="Edit recommendation"
               >
                 <svg
@@ -1370,7 +1555,7 @@ function AuthenticatedRecommendationCard({
                   e.stopPropagation();
                   onDelete(recommendation._id);
                 }}
-                className="group p-2 rounded-lg bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/30 dark:hover:to-pink-900/20 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border border-transparent hover:border-red-300/50 dark:hover:border-red-700/50 shadow-sm hover:shadow-md"
+                className="group p-2.5 rounded-xl bg-white dark:bg-slate-700/90 hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/40 dark:hover:to-pink-900/20 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-300 border-2 border-slate-200 dark:border-slate-600 hover:border-red-400/60 dark:hover:border-red-600/60 cursor-pointer"
                 title="Delete recommendation"
               >
                 <svg
