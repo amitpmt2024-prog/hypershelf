@@ -11,26 +11,24 @@ import { SignInButton, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import { Id } from "../convex/_generated/dataModel";
 
+// Predefined movie types
 const MOVIE_TYPES = ["Action", "Adventure", "Comedy", "Drama", "Horror", "Romance", "Documentary"] as const;
 
 export default function Home() {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md border-b border-blue-200/60 dark:border-blue-800/40">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 dark:from-blue-500 dark:via-cyan-500 dark:to-blue-400 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 ring-2 ring-blue-500/20">
-                  <span className="text-white font-bold text-lg">H</span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-xl opacity-0 hover:opacity-20 transition-opacity"></div>
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
+                <span className="text-white font-bold text-xl">H</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-blue-700 dark:text-blue-400 tracking-tight">
                   HypeShelf
                 </h1>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 -mt-0.5 hidden sm:block">
+                <p className="text-xs text-slate-500 dark:text-slate-400 -mt-0.5 hidden sm:block">
                   Collect and share the stuff you&apos;re hyped about
                 </p>
               </div>
@@ -38,20 +36,20 @@ export default function Home() {
             <div suppressHydrationWarning className="flex items-center gap-3">
               <Unauthenticated>
                 <SignInButton mode="modal">
-                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105">
+                  <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 border-2 border-blue-300 dark:border-blue-700 rounded-lg shadow-sm hover:shadow-md transition-all">
                     <span>Sign in</span>
-                    <span>→</span>
+                    <span className="text-blue-600 dark:text-blue-400">→</span>
                   </button>
                 </SignInButton>
               </Unauthenticated>
               <Authenticated>
-                <UserButton />
+        <UserButton />
               </Authenticated>
             </div>
           </div>
         </div>
       </header>
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 py-10 sm:py-14">
         <Authenticated>
             <AuthenticatedContent />
@@ -97,7 +95,7 @@ function PublicContent() {
 
       {recommendations.length === 0 ? (
         <div className="text-center py-20">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 mb-5 shadow-lg shadow-blue-500/10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
             <span className="text-4xl">📚</span>
           </div>
           <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
@@ -107,7 +105,7 @@ function PublicContent() {
             Be the first to share something you&apos;re hyped about!
           </p>
           <SignInButton mode="modal">
-            <button className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105 active:scale-95">
+            <button className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all">
               <span>Get Started</span>
               <span>→</span>
             </button>
@@ -159,7 +157,6 @@ function AuthenticatedContent() {
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
   const [editSelectedImage, setEditSelectedImage] = useState<File | null>(null);
   const [editImageError, setEditImageError] = useState<string | null>(null);
-  const [editImageRemoved, setEditImageRemoved] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [formErrors, setFormErrors] = useState<{
     title?: string;
@@ -184,6 +181,7 @@ function AuthenticatedContent() {
   const deleteRec = useMutation(api.myFunctions.deleteRecommendation);
   const toggleStaffPick = useMutation(api.myFunctions.toggleStaffPick);
   
+  // Get editing recommendation and its image URL
   const recommendations = data?.recommendations || [];
   const editingRec = editingRecommendation 
     ? recommendations.find((r) => r._id === editingRecommendation)
@@ -198,21 +196,24 @@ function AuthenticatedContent() {
     setImageError(null);
     
     if (file) {
+      // Validate file type
       const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
         setImageError("Please select a valid image file (JPEG, PNG, WebP, or GIF)");
-        e.target.value = "";
+        e.target.value = ""; // Clear the input
         return;
       }
       
-      const maxSize = 2 * 1024 * 1024;
+      // Validate file size (max 2MB for better performance)
+      const maxSize = 2 * 1024 * 1024; // 2MB
       if (file.size > maxSize) {
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         setImageError(`Image size is ${fileSizeMB}MB. Maximum allowed size is 2MB. Please choose a smaller image.`);
-        e.target.value = "";
+        e.target.value = ""; // Clear the input
         return;
       }
       
+      // Validate image dimensions
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new Image();
@@ -222,19 +223,20 @@ function AuthenticatedContent() {
           
           if (img.width > maxWidth || img.height > maxHeight) {
             setImageError(`Image dimensions are ${img.width}x${img.height}px. Maximum allowed dimensions are ${maxWidth}x${maxHeight}px. Please choose a smaller image.`);
-            e.target.value = "";
+            e.target.value = ""; // Clear the input
             setSelectedImage(null);
             setImagePreview(null);
             return;
           }
           
+          // All validations passed
           setSelectedImage(file);
           setImagePreview(reader.result as string);
           setImageError(null);
         };
         img.onerror = () => {
           setImageError("Invalid image file. Please choose a valid image.");
-          e.target.value = "";
+          e.target.value = ""; // Clear the input
         };
         img.src = reader.result as string;
       };
@@ -245,6 +247,7 @@ function AuthenticatedContent() {
   const validateForm = (data: { title: string; genre: string; link: string; blurb: string }) => {
     const errors: { title?: string; genre?: string; link?: string; blurb?: string } = {};
 
+    // Title validation
     if (!data.title.trim()) {
       errors.title = "Title is required";
     } else if (data.title.trim().length < 3) {
@@ -253,10 +256,12 @@ function AuthenticatedContent() {
       errors.title = "Title must be less than 200 characters";
     }
 
+    // Genre validation
     if (!data.genre) {
       errors.genre = "Please select a genre";
     }
 
+    // Link validation
     if (!data.link.trim()) {
       errors.link = "Link is required";
     } else {
@@ -270,6 +275,7 @@ function AuthenticatedContent() {
       }
     }
 
+    // Blurb validation
     if (!data.blurb.trim()) {
       errors.blurb = "Blurb is required";
     } else if (data.blurb.trim().length < 10) {
@@ -295,6 +301,7 @@ function AuthenticatedContent() {
     try {
       let imageId: Id<"_storage"> | undefined = undefined;
 
+      // Upload image if selected
       if (selectedImage) {
         const uploadUrl = await generateUploadUrl();
         const result = await fetch(uploadUrl, {
@@ -306,11 +313,13 @@ function AuthenticatedContent() {
         imageId = response.storageId as Id<"_storage">;
       }
 
+      // Create recommendation with image
       await createRec({
         ...formData,
         imageId,
       });
 
+      // Reset form
       setFormData({ title: "", genre: "", link: "", blurb: "" });
       setFormErrors({});
       setSelectedImage(null);
@@ -374,7 +383,6 @@ function AuthenticatedContent() {
     setEditSelectedImage(null);
     setEditImagePreview(null);
     setEditImageError(null);
-    setEditImageRemoved(false);
   };
 
   const handleEditCancel = () => {
@@ -384,7 +392,6 @@ function AuthenticatedContent() {
     setEditSelectedImage(null);
     setEditImagePreview(null);
     setEditImageError(null);
-    setEditImageRemoved(false);
   };
 
   const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -392,6 +399,7 @@ function AuthenticatedContent() {
     setEditImageError(null);
     
     if (file) {
+      // Validate file type
       const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
       if (!allowedTypes.includes(file.type)) {
         setEditImageError("Please select a valid image file (JPEG, PNG, WebP, or GIF)");
@@ -399,6 +407,7 @@ function AuthenticatedContent() {
         return;
       }
       
+      // Validate file size (max 2MB)
       const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
         const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
@@ -407,6 +416,7 @@ function AuthenticatedContent() {
         return;
       }
       
+      // Validate image dimensions
       const reader = new FileReader();
       reader.onloadend = () => {
         const img = new Image();
@@ -425,7 +435,6 @@ function AuthenticatedContent() {
           setEditSelectedImage(file);
           setEditImagePreview(reader.result as string);
           setEditImageError(null);
-          setEditImageRemoved(false);
         };
         img.onerror = () => {
           setEditImageError("Invalid image file. Please choose a valid image.");
@@ -456,6 +465,7 @@ function AuthenticatedContent() {
       let imageId: Id<"_storage"> | undefined = undefined;
       const currentRec = recommendations.find((r) => r._id === editingRecommendation);
 
+      // Upload new image if selected
       if (editSelectedImage) {
         const uploadUrl = await generateUploadUrl();
         const result = await fetch(uploadUrl, {
@@ -465,16 +475,19 @@ function AuthenticatedContent() {
         });
         const response = await result.json();
         imageId = response.storageId as Id<"_storage">;
-      } else if (!editImageRemoved && currentRec?.imageId) {
+      } else if (currentRec?.imageId) {
+        // Keep existing image if no new image selected
         imageId = currentRec.imageId;
       }
 
+      // Update recommendation
       await updateRec({
         recommendationId: editingRecommendation,
         ...editFormData,
         imageId,
       });
 
+      // Reset form
       setEditFormErrors({});
       handleEditCancel();
     } catch (error) {
@@ -509,7 +522,7 @@ function AuthenticatedContent() {
     } catch (error) {
       const err = error as { message?: string };
       console.error("Error toggling staff pick:", error);
-      alert(err?.message || "You don't have permission to perform this action");
+      alert(err?.message || "Only admins can mark recommendations as Staff Pick");
     } finally {
       setTogglingStaffPick(false);
     }
@@ -538,6 +551,7 @@ function AuthenticatedContent() {
 
   return (
     <>
+      {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
@@ -569,7 +583,7 @@ function AuthenticatedContent() {
                   Delete Recommendation
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  This action cannot be undone
+                  {isAdmin ? "Admin: Delete any recommendation" : "This action cannot be undone"}
                 </p>
               </div>
             </div>
@@ -596,6 +610,7 @@ function AuthenticatedContent() {
         </div>
       )}
 
+      {/* Staff Pick Confirmation Modal */}
       {staffPickModalOpen && recommendationForStaffPick && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
@@ -614,7 +629,7 @@ function AuthenticatedContent() {
                   {recommendationForStaffPick.currentValue ? "Remove Staff Pick" : "Mark as Staff Pick"}
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  Featured content management
+                  Admin Action
                 </p>
               </div>
             </div>
@@ -645,167 +660,173 @@ function AuthenticatedContent() {
         </div>
       )}
 
-      {editingRecommendation && editingRec ? (
-        <div className="flex flex-col gap-8">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-1">
-                Edit Recommendation
-              </h2>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                Update your recommendation details
-              </p>
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-2">
+            Your HypeShelf
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+            Manage your recommendations and discover new favorites
+          </p>
+          {isAdmin && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">👑 Admin</span>
             </div>
-            <button
-              type="button"
-              onClick={handleEditCancel}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md border border-transparent hover:border-slate-300 dark:hover:border-slate-600"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              <span>Back to List</span>
-            </button>
-          </div>
+          )}
+        </div>
+        <button
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            if (showAddForm) {
+              setFormErrors({});
+              setFormData({ title: "", genre: "", link: "", blurb: "" });
+              setSelectedImage(null);
+              setImagePreview(null);
+              setImageError(null);
+            }
+          }}
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all"
+        >
+          <span className="text-base">{showAddForm ? "✕" : "+"}</span>
+          <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
+        </button>
+      </div>
 
-          <form
-            onSubmit={handleEditSubmit}
-            className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter the title..."
-                  value={editFormData.title}
-                  onChange={(e) => {
-                    setEditFormData({ ...editFormData, title: e.target.value });
-                    if (editFormErrors.title) {
-                      setEditFormErrors({ ...editFormErrors, title: undefined });
-                    }
-                  }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                    editFormErrors.title
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                  }`}
-                  required
-                />
-                {editFormErrors.title && (
-                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.title}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Genre <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={editFormData.genre}
-                  onChange={(e) => {
-                    setEditFormData({ ...editFormData, genre: e.target.value });
-                    if (editFormErrors.genre) {
-                      setEditFormErrors({ ...editFormErrors, genre: undefined });
-                    }
-                  }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                    editFormErrors.genre
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                  }`}
-                  required
-                >
-                  <option value="">Select a genre...</option>
-                  {MOVIE_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                {editFormErrors.genre && (
-                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.genre}</p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Link (URL) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={editFormData.link}
-                  onChange={(e) => {
-                    setEditFormData({ ...editFormData, link: e.target.value });
-                    if (editFormErrors.link) {
-                      setEditFormErrors({ ...editFormErrors, link: undefined });
-                    }
-                  }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                    editFormErrors.link
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                  }`}
-                  required
-                />
-                {editFormErrors.link && (
-                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.link}</p>
-                )}
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Short Blurb <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  placeholder="Tell us why you're hyped about this..."
-                  value={editFormData.blurb}
-                  onChange={(e) => {
-                    setEditFormData({ ...editFormData, blurb: e.target.value });
-                    if (editFormErrors.blurb) {
-                      setEditFormErrors({ ...editFormErrors, blurb: undefined });
-                    }
-                  }}
-                  className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[80px] resize-y ${
-                    editFormErrors.blurb
-                      ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                      : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                  }`}
-                  required
-                />
-                {editFormErrors.blurb && (
-                  <p className="mt-1 text-xs text-red-600 dark:text-red-400">{editFormErrors.blurb}</p>
-                )}
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Movie Picture <span className="text-xs font-normal text-slate-500">(Optional, max 2MB)</span>
-                </label>
+      {/* Edit Form */}
+      {editingRecommendation && editingRec && (
+        <form
+          onSubmit={handleEditSubmit}
+          className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+        >
+          <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-50">Edit Recommendation</h3>
+          <div className="flex flex-col gap-5">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Enter the title..."
+                value={editFormData.title}
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, title: e.target.value });
+                  if (editFormErrors.title) {
+                    setEditFormErrors({ ...editFormErrors, title: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  editFormErrors.title
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
+              />
+              {editFormErrors.title && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.title}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Genre <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={editFormData.genre}
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, genre: e.target.value });
+                  if (editFormErrors.genre) {
+                    setEditFormErrors({ ...editFormErrors, genre: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  editFormErrors.genre
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
+              >
+                <option value="">Select a genre...</option>
+                {MOVIE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              {editFormErrors.genre && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.genre}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Link (URL) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={editFormData.link}
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, link: e.target.value });
+                  if (editFormErrors.link) {
+                    setEditFormErrors({ ...editFormErrors, link: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  editFormErrors.link
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
+              />
+              {editFormErrors.link && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.link}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Short Blurb <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                placeholder="Tell us why you&apos;re hyped about this..."
+                value={editFormData.blurb}
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, blurb: e.target.value });
+                  if (editFormErrors.blurb) {
+                    setEditFormErrors({ ...editFormErrors, blurb: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y ${
+                  editFormErrors.blurb
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
+              />
+              {editFormErrors.blurb && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{editFormErrors.blurb}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Movie Picture (Optional)
+              </label>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                Max size: 2MB | Max dimensions: 2000x2000px | Formats: JPEG, PNG, WebP, GIF
+              </p>
+              <div className="space-y-3">
                 <input
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                   onChange={handleEditImageChange}
-                  className="w-full px-3 py-2 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
                 />
                 {editImageError && (
-                  <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                    <p className="text-xs text-red-700 dark:text-red-400">{editImageError}</p>
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
+                    <p className="text-sm text-red-700 dark:text-red-400 font-medium">{editImageError}</p>
                   </div>
                 )}
-                {(editImagePreview || (editImageUrl && !editSelectedImage && !editImageRemoved)) && !editImageError && (
-                  <div className="relative group mt-2">
-                    <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+                {(editImagePreview || (editImageUrl && !editSelectedImage)) && !editImageError && (
+                  <div className="relative group">
+                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
                       <img
                         src={editImagePreview || editImageUrl || ""}
                         alt="Preview"
@@ -818,292 +839,266 @@ function AuthenticatedContent() {
                         setEditSelectedImage(null);
                         setEditImagePreview(null);
                         setEditImageError(null);
-                        setEditImageRemoved(true);
                         const fileInput = document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement;
                         if (fileInput) fileInput.value = "";
                       }}
-                      className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors shadow-md"
+                      className="absolute top-3 right-3 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-md border-2 border-red-600"
                     >
                       Remove
                     </button>
                     {editSelectedImage && (
-                      <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded backdrop-blur-sm">
+                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded backdrop-blur-sm">
                         {(editSelectedImage.size / (1024 * 1024)).toFixed(2)} MB
                       </div>
                     )}
                     {!editSelectedImage && editImageUrl && (
-                      <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded backdrop-blur-sm">
-                        Current
+                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded backdrop-blur-sm">
+                        Current Image
                       </div>
                     )}
                   </div>
                 )}
               </div>
-              <div className="md:col-span-2 flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleEditCancel}
-                  disabled={updating}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100/80 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={updating}
-                  className="flex-1 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                >
-                  {updating ? "Updating..." : "Update"}
-                </button>
-              </div>
             </div>
-          </form>
-        </div>
-      ) : (
-        <>
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-end">
+            <div className="flex gap-3">
               <button
                 type="button"
-                onClick={() => {
-                  setShowAddForm(!showAddForm);
-                  if (showAddForm) {
-                    setFormErrors({});
-                    setFormData({ title: "", genre: "", link: "", blurb: "" });
-                    setSelectedImage(null);
-                    setImagePreview(null);
-                    setImageError(null);
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105 active:scale-95"
+                onClick={handleEditCancel}
+                disabled={updating}
+                className="flex-1 px-6 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-all border-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="text-base">{showAddForm ? "✕" : "+"}</span>
-                <span>{showAddForm ? "Cancel" : "Add Recommendation"}</span>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updating}
+                className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {updating ? "Updating..." : "Update Recommendation"}
               </button>
             </div>
+          </div>
+        </form>
+      )}
 
-            {showAddForm && (
-              <form
-                onSubmit={handleSubmit}
-                className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/50"
+      {showAddForm && (
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-slate-800 p-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-lg"
+        >
+          <h3 className="text-xl font-bold mb-6 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
+          <div className="flex flex-col gap-5">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Enter the title..."
+                value={formData.title}
+                onChange={(e) => {
+                  setFormData({ ...formData, title: e.target.value });
+                  if (formErrors.title) {
+                    setFormErrors({ ...formErrors, title: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  formErrors.title
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
+              />
+              {formErrors.title && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.title}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Genre <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.genre}
+                onChange={(e) => {
+                  setFormData({ ...formData, genre: e.target.value });
+                  if (formErrors.genre) {
+                    setFormErrors({ ...formErrors, genre: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  formErrors.genre
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
               >
-                <h3 className="text-lg font-bold mb-4 text-slate-900 dark:text-slate-50">Add New Recommendation</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Title <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Enter the title..."
-                      value={formData.title}
-                      onChange={(e) => {
-                        setFormData({ ...formData, title: e.target.value });
-                        if (formErrors.title) {
-                          setFormErrors({ ...formErrors, title: undefined });
-                        }
-                      }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                        formErrors.title
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                      }`}
-                      required
-                    />
-                    {formErrors.title && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.title}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Genre <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.genre}
-                      onChange={(e) => {
-                        setFormData({ ...formData, genre: e.target.value });
-                        if (formErrors.genre) {
-                          setFormErrors({ ...formErrors, genre: undefined });
-                        }
-                      }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                        formErrors.genre
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                      }`}
-                      required
-                    >
-                      <option value="">Select a genre...</option>
-                      {MOVIE_TYPES.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
-                    {formErrors.genre && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.genre}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Link (URL) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="https://..."
-                      value={formData.link}
-                      onChange={(e) => {
-                        setFormData({ ...formData, link: e.target.value });
-                        if (formErrors.link) {
-                          setFormErrors({ ...formErrors, link: undefined });
-                        }
-                      }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
-                        formErrors.link
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                      }`}
-                      required
-                    />
-                    {formErrors.link && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.link}</p>
-                    )}
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Short Blurb <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      placeholder="Tell us why you're hyped about this..."
-                      value={formData.blurb}
-                      onChange={(e) => {
-                        setFormData({ ...formData, blurb: e.target.value });
-                        if (formErrors.blurb) {
-                          setFormErrors({ ...formErrors, blurb: undefined });
-                        }
-                      }}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[80px] resize-y ${
-                        formErrors.blurb
-                          ? "border-red-500 dark:border-red-500 focus:border-red-500"
-                          : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
-                      }`}
-                      required
-                    />
-                    {formErrors.blurb && (
-                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{formErrors.blurb}</p>
-                    )}
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Movie Picture <span className="text-xs font-normal text-slate-500">(Optional, max 2MB)</span>
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
-                      onChange={handleImageChange}
-                      className="w-full px-3 py-2 text-sm rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
-                    />
-                    {imageError && (
-                      <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                        <p className="text-xs text-red-700 dark:text-red-400">{imageError}</p>
-                      </div>
-                    )}
-                    {imagePreview && !imageError && (
-                      <div className="relative group mt-2">
-                        <div className="w-full max-w-xs aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="w-full h-full object-cover object-center"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedImage(null);
-                            setImagePreview(null);
-                            setImageError(null);
-                            const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-                            if (fileInput) fileInput.value = "";
-                          }}
-                          className="absolute top-2 right-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded hover:bg-red-600 transition-colors shadow-md"
-                        >
-                          Remove
-                        </button>
-                        {selectedImage && (
-                          <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/60 text-white text-[10px] font-medium rounded backdrop-blur-sm">
-                            {(selectedImage.size / (1024 * 1024)).toFixed(2)} MB
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="md:col-span-2">
-                    <button
-                      type="submit"
-                      disabled={uploading}
-                      className="w-full px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 dark:from-blue-500 dark:to-cyan-500 dark:hover:from-blue-600 dark:hover:to-cyan-600 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    >
-                      {uploading ? "Uploading..." : "Submit Recommendation"}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            )}
-
-            {!showAddForm && (
-              <>
-                <div className="flex flex-wrap gap-2.5">
-                  {allGenres.map((genre) => (
-                    <button
-                      key={genre}
-                      type="button"
-                      onClick={() => setSelectedGenre(genre)}
-                      className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 ${
-                        selectedGenre === genre
-                          ? "bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-500/30 dark:from-blue-500 dark:to-cyan-500 ring-2 ring-blue-400/20 transform scale-105"
-                          : "bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/20 dark:hover:to-cyan-900/10 shadow-sm hover:shadow-md"
-                      }`}
-                    >
-                      {genre === "all" ? "All" : genre}
-                    </button>
-                  ))}
-                </div>
-
-                {recommendations.length === 0 ? (
-                  <div className="text-center py-20">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 mb-5 shadow-lg shadow-blue-500/10">
-                      <span className="text-4xl">📚</span>
-                    </div>
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                      {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {selectedGenre === "all" 
-                        ? "Be the first to share something you&apos;re hyped about!"
-                        : `Try a different genre or add the first ${selectedGenre} recommendation!`}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {recommendations.map((rec: typeof recommendations[0]) => (
-                      <AuthenticatedRecommendationCard
-                        key={rec._id}
-                        recommendation={rec}
-                        isAdmin={isAdmin}
-                        currentUserId={currentUserId}
-                        onDelete={handleDeleteClick}
-                        onEdit={handleEditClick}
-                        onToggleStaffPick={handleToggleStaffPickClick}
-                      />
-                    ))}
+                <option value="">Select a genre...</option>
+                {MOVIE_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+              {formErrors.genre && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.genre}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Link (URL) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={formData.link}
+                onChange={(e) => {
+                  setFormData({ ...formData, link: e.target.value });
+                  if (formErrors.link) {
+                    setFormErrors({ ...formErrors, link: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none ${
+                  formErrors.link
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
+              />
+              {formErrors.link && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.link}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Short Blurb <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                placeholder="Tell us why you&apos;re hyped about this..."
+                value={formData.blurb}
+                onChange={(e) => {
+                  setFormData({ ...formData, blurb: e.target.value });
+                  if (formErrors.blurb) {
+                    setFormErrors({ ...formErrors, blurb: undefined });
+                  }
+                }}
+                className={`w-full px-4 py-3 rounded-lg border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px] resize-y ${
+                  formErrors.blurb
+                    ? "border-red-500 dark:border-red-500 focus:border-red-500"
+                    : "border-slate-300 dark:border-slate-600 focus:border-blue-500"
+                }`}
+                required
+              />
+              {formErrors.blurb && (
+                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{formErrors.blurb}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Movie Picture (Optional)
+              </label>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                Max size: 2MB | Max dimensions: 2000x2000px | Formats: JPEG, PNG, WebP, GIF
+              </p>
+              <div className="space-y-3">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                  onChange={handleImageChange}
+                  className="w-full px-4 py-3 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-400"
+                />
+                {imageError && (
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
+                    <p className="text-sm text-red-700 dark:text-red-400 font-medium">{imageError}</p>
                   </div>
                 )}
-              </>
-            )}
+                {imagePreview && !imageError && (
+                  <div className="relative group">
+                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover object-center"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedImage(null);
+                        setImagePreview(null);
+                        setImageError(null);
+                        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+                        if (fileInput) fileInput.value = "";
+                      }}
+                      className="absolute top-3 right-3 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-md border-2 border-red-600"
+                    >
+                      Remove
+                    </button>
+                    {selectedImage && (
+                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-black/60 text-white text-xs font-medium rounded backdrop-blur-sm">
+                        {(selectedImage.size / (1024 * 1024)).toFixed(2)} MB
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={uploading}
+              className="w-full px-6 py-3.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-md shadow-blue-500/30 hover:shadow-lg hover:shadow-blue-500/40 transition-all mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {uploading ? "Uploading..." : "Submit Recommendation"}
+            </button>
           </div>
-        </>
+        </form>
       )}
+
+      <div className="flex flex-wrap gap-2.5">
+        {allGenres.map((genre) => (
+          <button
+            key={genre}
+            onClick={() => setSelectedGenre(genre)}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+              selectedGenre === genre
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 dark:bg-blue-500"
+                : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-2 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            }`}
+          >
+            {genre === "all" ? "All" : genre}
+          </button>
+        ))}
+      </div>
+
+      {recommendations.length === 0 ? (
+        <div className="text-center py-20">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-blue-100 dark:bg-blue-900/40 mb-5">
+            <span className="text-4xl">📚</span>
+          </div>
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
+            {selectedGenre === "all" ? "No recommendations yet" : `No ${selectedGenre} recommendations`}
+          </h3>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {selectedGenre === "all" 
+              ? "Be the first to share something you&apos;re hyped about!"
+              : `Try a different genre or add the first ${selectedGenre} recommendation!`}
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {recommendations.map((rec: typeof recommendations[0]) => (
+            <AuthenticatedRecommendationCard
+              key={rec._id}
+              recommendation={rec}
+              isAdmin={isAdmin}
+              currentUserId={currentUserId}
+              onDelete={handleDeleteClick}
+              onEdit={handleEditClick}
+              onToggleStaffPick={handleToggleStaffPickClick}
+            />
+          ))}
+        </div>
+      )}
+      </div>
     </>
   );
 }
@@ -1141,52 +1136,52 @@ function RecommendationCard({
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600/50 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
       {recommendation.isStaffPick && (
-        <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/20">
+        <div className="absolute -top-2.5 -right-2.5">
+          <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
         </div>
       )}
       
-      <div className="space-y-3">
-        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-1 group-hover:border-blue-300 dark:group-hover:border-blue-600/50 transition-colors">
-          <img
-            src={imageUrl || "/no-image.png"}
-            alt={recommendation.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${genreColor} shadow-sm`}>
-              {recommendation.genre}
-            </span>
+      <div className="space-y-4">
+        {imageUrl && (
+          <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+            <img
+              src={imageUrl}
+              alt={recommendation.title}
+              className="w-full h-full object-cover object-center"
+              loading="lazy"
+            />
           </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+        )}
+        <div>
+          <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
+            {recommendation.genre}
+          </span>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             <a
               href={recommendation.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline decoration-2 underline-offset-2"
+              className="hover:underline"
             >
               {recommendation.title}
             </a>
           </h3>
         </div>
         
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-500/30 flex-shrink-0 ring-1 ring-blue-500/20">
+        <div className="flex items-center gap-2.5 pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
             {recommendation.authorName.charAt(0).toUpperCase()}
           </div>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
           </span>
         </div>
@@ -1252,75 +1247,72 @@ function AuthenticatedRecommendationCard({
   const genreColor = genreColors[genreKey] || "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700";
 
   return (
-    <div className="group relative bg-white dark:bg-slate-800/90 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 hover:border-blue-300 dark:hover:border-blue-600/50 shadow-md hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 transition-all duration-300 overflow-hidden backdrop-blur-sm hover:-translate-y-1">
+    <div className="group relative bg-white dark:bg-slate-800 p-6 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 shadow-sm hover:shadow-md transition-all duration-200">
       {recommendation.isStaffPick && (
-        <div className="absolute top-3 right-3 z-10">
-          <span className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-lg shadow-amber-500/30 ring-1 ring-amber-400/20">
+        <div className="absolute -top-2.5 -right-2.5 z-10">
+          <span className="inline-flex items-center gap-1.5 bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md border-2 border-amber-600">
             <span>⭐</span>
             <span>Staff Pick</span>
           </span>
         </div>
       )}
       
-      <div className="space-y-3">
-        <div className="w-full aspect-[16/9] rounded-xl overflow-hidden border border-slate-200/60 dark:border-slate-700/60 bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center p-1 group-hover:border-blue-300 dark:group-hover:border-blue-600/50 transition-colors">
-          <img
-            src={imageUrl || "/no-image.png"}
-            alt={recommendation.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className={`inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border ${genreColor} shadow-sm`}>
-              {recommendation.genre}
-            </span>
+      <div className="space-y-4">
+        {imageUrl && (
+          <div className="w-full aspect-[4/3] rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-sm bg-slate-100 dark:bg-slate-900">
+            <img
+              src={imageUrl}
+              alt={recommendation.title}
+              className="w-full h-full object-cover object-center"
+              loading="lazy"
+            />
           </div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-slate-50 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+        )}
+        <div>
+          <span className={`inline-block px-3 py-1.5 rounded-lg text-xs font-semibold border-2 ${genreColor} mb-3`}>
+            {recommendation.genre}
+          </span>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-50 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
             <a
               href={recommendation.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:underline decoration-2 underline-offset-2"
+              className="hover:underline"
             >
               {recommendation.title}
             </a>
           </h3>
         </div>
         
-        <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-3">
           {recommendation.blurb}
         </p>
         
-        <div className="flex items-center justify-between pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 dark:from-blue-500 dark:to-cyan-400 flex items-center justify-center text-white font-bold text-xs shadow-md shadow-blue-500/30 flex-shrink-0 ring-1 ring-blue-500/20">
+        <div className="flex items-center justify-between pt-3 border-t-2 border-slate-200 dark:border-slate-700">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
               {recommendation.authorName.charAt(0).toUpperCase()}
             </div>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+            <span className="text-xs text-slate-500 dark:text-slate-400">
               by <span className="font-semibold text-slate-700 dark:text-slate-300">{recommendation.authorName}</span>
             </span>
           </div>
           
-          <div className="flex gap-1.5 flex-shrink-0">
+          <div className="flex gap-2">
             {isAdmin && (
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title);
-                }}
-                className={`p-2 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md ${
+                onClick={() =>
+                  onToggleStaffPick(recommendation._id, recommendation.isStaffPick, recommendation.title)
+                }
+                className={`p-2 rounded-lg transition-all border-2 ${
                   recommendation.isStaffPick
-                    ? "bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/40 dark:to-amber-800/20 text-amber-600 dark:text-amber-400 border border-amber-300/50 dark:border-amber-700/50 ring-1 ring-amber-400/20"
-                    : "bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-amber-50 hover:to-amber-100/50 dark:hover:from-amber-900/30 dark:hover:to-amber-800/10 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border border-transparent hover:border-amber-300/50 dark:hover:border-amber-700/50"
+                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+                    : "bg-slate-100 dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-slate-600 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 border-transparent hover:border-amber-300 dark:hover:border-amber-700"
                 }`}
                 title={recommendation.isStaffPick ? "Remove Staff Pick" : "Mark as Staff Pick"}
               >
                 <svg
-                  className="w-4 h-4"
+                  className="w-5 h-5"
                   fill={recommendation.isStaffPick ? "currentColor" : "none"}
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1337,17 +1329,12 @@ function AuthenticatedRecommendationCard({
             )}
             {canEdit && (
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onEdit(recommendation);
-                }}
-                className="group p-2 rounded-lg bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-blue-50 hover:to-cyan-50 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/20 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 border border-transparent hover:border-blue-300/50 dark:hover:border-blue-700/50 shadow-sm hover:shadow-md"
-                title="Edit recommendation"
+                onClick={() => onEdit(recommendation)}
+                className="group p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all border-2 border-transparent hover:border-blue-300 dark:hover:border-blue-700"
+                title={isAdmin ? "Edit (Admin)" : "Edit Your Recommendation"}
               >
                 <svg
-                  className="w-4 h-4 transition-transform group-hover:scale-110"
+                  className="w-5 h-5 transition-transform group-hover:scale-110"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -1364,17 +1351,12 @@ function AuthenticatedRecommendationCard({
             )}
             {canDelete && (
               <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete(recommendation._id);
-                }}
-                className="group p-2 rounded-lg bg-slate-100/80 dark:bg-slate-700/80 hover:bg-gradient-to-br hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/30 dark:hover:to-pink-900/20 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200 border border-transparent hover:border-red-300/50 dark:hover:border-red-700/50 shadow-sm hover:shadow-md"
-                title="Delete recommendation"
+                onClick={() => onDelete(recommendation._id)}
+                className="group p-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-red-100 dark:hover:bg-red-900/30 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-all border-2 border-transparent hover:border-red-300 dark:hover:border-red-700"
+                title={isAdmin ? "Delete (Admin)" : "Delete Your Recommendation"}
               >
                 <svg
-                  className="w-4 h-4 transition-transform group-hover:scale-110"
+                  className="w-5 h-5 transition-transform group-hover:scale-110"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
